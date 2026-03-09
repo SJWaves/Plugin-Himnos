@@ -16,4 +16,6 @@ export const router = createBrowserRouter([
     path: '/display',
     Component: DisplayPage,
   },
-]);
+], {
+  basename: '/Plugin-Himnos/',
+});

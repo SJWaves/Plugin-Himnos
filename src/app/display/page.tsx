@@ -44,16 +44,22 @@ export default function DisplayPage() {
 
   return (
     <div
-      className="w-full h-screen relative bg-black overflow-hidden"
-      style={{ fontFamily: config.fontFamily }}
+      className="w-full h-screen relative overflow-hidden"
+      style={{
+        fontFamily: config.fontFamily,
+        backgroundColor: config.screenBackgroundColor,
+      }}
     >
-      {/* Fondo con gradiente sutil */}
-      <div
-        className="absolute inset-0 opacity-30"
-        style={{
-          background: `radial-gradient(circle at center, rgba(197, 160, 33, 0.1) 0%, transparent 70%)`,
-        }}
-      />
+      {/* Fondo con gradiente sutil - solo si showGlassPanel */}
+      {config.showGlassPanel && (
+        <div
+          className="absolute inset-0"
+          style={{
+            background: `radial-gradient(circle at center, rgba(197, 160, 33, 0.1) 0%, transparent 70%)`,
+            opacity: 0.3,
+          }}
+        />
+      )}
 
       {/* Texto del verso con efecto liquid glass */}
       <div
@@ -63,36 +69,42 @@ export default function DisplayPage() {
           className={`max-w-[95%] sm:max-w-[90%] md:max-w-[85%] ${textAlignClasses[config.textAlign]} mx-auto`}
         >
           <div
-            className="glass-golden rounded-2xl sm:rounded-3xl border relative overflow-hidden"
+            className={`${config.showGlassPanel ? 'glass-golden rounded-2xl sm:rounded-3xl border' : ''} relative overflow-hidden`}
             style={{
               padding: `${config.padding}px`,
               maxWidth: '900px',
               margin: '0 auto',
-              background: `linear-gradient(
-                135deg,
-                rgba(197, 160, 33, 0.08) 0%,
-                rgba(0, 0, 0, ${0.4 + (config.backgroundColor.slice(-2) === 'FF' ? 0.3 : 0.1)}) 50%,
-                rgba(197, 160, 33, 0.05) 100%
-              )`,
-              backdropFilter: 'blur(16px)',
-              WebkitBackdropFilter: 'blur(16px)',
-              border: '1px solid rgba(197, 160, 33, 0.4)',
-              boxShadow: `
-                0 12px 40px 0 rgba(0, 0, 0, 0.6),
-                0 0 0 1px rgba(197, 160, 33, 0.15) inset,
-                0 4px 12px 0 rgba(197, 160, 33, 0.25) inset,
-                0 0 60px rgba(197, 160, 33, 0.15)
-              `,
+              background: config.showGlassPanel
+                ? `linear-gradient(
+                    135deg,
+                    rgba(197, 160, 33, 0.08) 0%,
+                    rgba(0, 0, 0, 0.5) 50%,
+                    rgba(197, 160, 33, 0.05) 100%
+                  )`
+                : 'transparent',
+              backdropFilter: config.showGlassPanel ? 'blur(16px)' : 'none',
+              WebkitBackdropFilter: config.showGlassPanel ? 'blur(16px)' : 'none',
+              border: config.showGlassPanel ? '1px solid rgba(197, 160, 33, 0.4)' : 'none',
+              boxShadow: config.showGlassPanel
+                ? `
+                    0 12px 40px 0 rgba(0, 0, 0, 0.6),
+                    0 0 0 1px rgba(197, 160, 33, 0.15) inset,
+                    0 4px 12px 0 rgba(197, 160, 33, 0.25) inset,
+                    0 0 60px rgba(197, 160, 33, 0.15)
+                  `
+                : 'none',
             }}
           >
-            {/* Brillo superior integrado */}
-            <div
-              className="absolute top-0 left-0 right-0 h-1/4 rounded-t-2xl sm:rounded-t-3xl opacity-40"
-              style={{
-                background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, transparent 100%)',
-                pointerEvents: 'none',
-              }}
-            />
+            {/* Brillo superior integrado - solo si showGlassPanel */}
+            {config.showGlassPanel && (
+              <div
+                className="absolute top-0 left-0 right-0 h-1/4 rounded-t-2xl sm:rounded-t-3xl opacity-40"
+                style={{
+                  background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, transparent 100%)',
+                  pointerEvents: 'none',
+                }}
+              />
+            )}
 
             {/* Título del himno - siempre visible */}
             <div className="relative text-center mb-6 sm:mb-8">

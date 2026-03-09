@@ -9,6 +9,9 @@ export interface DisplayConfig {
   position: 'top' | 'middle' | 'bottom';
   textShadow: boolean;
   padding: number;
+  showGlassPanel: boolean;
+  backgroundOpacity: number;
+  screenBackgroundColor: string;
 }
 
 export interface HymnDisplay {
@@ -24,11 +27,14 @@ export const DEFAULT_CONFIG: DisplayConfig = {
   fontSize: 48,
   fontFamily: 'Arial, sans-serif',
   textColor: '#FFFFFF',
-  backgroundColor: 'rgba(0, 0, 0, 0.7)',
+  backgroundColor: 'rgba(0, 0, 0, 0)',
   textAlign: 'center',
   position: 'bottom',
   textShadow: true,
   padding: 40,
+  showGlassPanel: true,
+  backgroundOpacity: 0,
+  screenBackgroundColor: '#000000',
 };
 
 const CHANNEL_NAME = 'obs-hymn-display';

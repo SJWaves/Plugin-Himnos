@@ -38,6 +38,26 @@ export function SettingsModal({
 
         {/* Content */}
         <div className="p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-5 md:space-y-6">
+          {/* Fuente */}
+          <div>
+            <label className="block text-xs sm:text-sm font-medium text-white/90 mb-2 sm:mb-3">
+              Tipo de Fuente
+            </label>
+            <select
+              value={config.fontFamily}
+              onChange={(e) => onConfigChange({ fontFamily: e.target.value })}
+              className="glass-input w-full px-3 sm:px-4 py-2 sm:py-2 text-white text-xs sm:text-base"
+            >
+              <option value="Arial, sans-serif">Arial</option>
+              <option value="'Georgia', serif">Georgia</option>
+              <option value="'Times New Roman', serif">Times New Roman</option>
+              <option value="'Courier New', monospace">Courier New</option>
+              <option value="'Trebuchet MS', sans-serif">Trebuchet MS</option>
+              <option value="'Verdana', sans-serif">Verdana</option>
+              <option value="'Comic Sans MS', cursive">Comic Sans MS</option>
+            </select>
+          </div>
+
           {/* Tamaño de letra */}
           <div>
             <label className="block text-xs sm:text-sm font-medium text-white/90 mb-2 sm:mb-3">
@@ -212,6 +232,51 @@ export function SettingsModal({
             <div className="flex justify-between text-xs text-white/40 mt-1">
               <span>0px</span>
               <span>80px</span>
+            </div>
+          </div>
+
+          {/* Mostrar Panel Decorativo */}
+          <div className="flex items-center justify-between p-3 sm:p-4 bg-[#333]/50 rounded-lg">
+            <label htmlFor="showGlassPanel" className="text-xs sm:text-sm font-medium text-white">
+              Mostrar Panel Decorativo
+            </label>
+            <label className="relative inline-block w-12 h-6">
+              <input
+                type="checkbox"
+                id="showGlassPanel"
+                checked={config.showGlassPanel}
+                onChange={(e) =>
+                  onConfigChange({ showGlassPanel: e.target.checked })
+                }
+                className="sr-only peer"
+              />
+              <span className="absolute inset-0 bg-[#555] rounded-full peer-checked:bg-[#C5A021] transition-colors"></span>
+              <span className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-6"></span>
+            </label>
+          </div>
+
+          {/* Color de Fondo de Pantalla */}
+          <div>
+            <label className="block text-xs sm:text-sm font-medium text-white/90 mb-2 sm:mb-3">
+              Color de Fondo de Pantalla
+            </label>
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-start sm:items-center">
+              <input
+                type="color"
+                value={config.screenBackgroundColor}
+                onChange={(e) =>
+                  onConfigChange({ screenBackgroundColor: e.target.value })
+                }
+                className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg cursor-pointer border-2 border-accent/40 flex-shrink-0"
+              />
+              <input
+                type="text"
+                value={config.screenBackgroundColor}
+                onChange={(e) =>
+                  onConfigChange({ screenBackgroundColor: e.target.value })
+                }
+                className="glass-input flex-1 px-3 sm:px-4 py-2 sm:py-2 text-white text-xs sm:text-base"
+              />
             </div>
           </div>
         </div>

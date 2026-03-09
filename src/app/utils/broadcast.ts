@@ -1,17 +1,41 @@
 // Utilidad para comunicación entre el panel de control y el display usando BroadcastChannel API
 
 export interface DisplayConfig {
+  // Texto del himno
   fontSize: number;
   fontFamily: string;
   textColor: string;
-  backgroundColor: string;
   textAlign: 'left' | 'center' | 'right';
-  position: 'top' | 'middle' | 'bottom';
   textShadow: boolean;
+  
+  // Título del himno
+  showTitle: boolean;
+  titleFontSize: number;
+  titleColor: string;
+  
+  // Panel/Contenedor
+  showPanel: boolean;
+  panelBackground: string;
+  panelOpacity: number;
+  panelBorderColor: string;
+  panelBlur: number;
+  
+  // Posicionamiento
+  position: 'top' | 'middle' | 'bottom';
+  horizontalAlignment: 'left' | 'center' | 'right';
+  verticalOffset: number;
+  horizontalOffset: number;
+  maxWidth: number;
+  
+  // Espaciado
   padding: number;
-  showGlassPanel: boolean;
-  backgroundOpacity: number;
-  screenBackgroundColor: string;
+  marginTop: number;
+  marginBottom: number;
+  marginLeft: number;
+  marginRight: number;
+  
+  // Efecto de fondo (solo visual, no afecta transparencia)
+  showBackgroundGradient: boolean;
 }
 
 export interface HymnDisplay {
@@ -24,17 +48,41 @@ export interface HymnDisplay {
 }
 
 export const DEFAULT_CONFIG: DisplayConfig = {
+  // Texto del himno
   fontSize: 48,
   fontFamily: 'Arial, sans-serif',
   textColor: '#FFFFFF',
-  backgroundColor: 'rgba(0, 0, 0, 0)',
   textAlign: 'center',
-  position: 'bottom',
   textShadow: true,
-  padding: 40,
-  showGlassPanel: true,
-  backgroundOpacity: 0,
-  screenBackgroundColor: '#000000',
+  
+  // Título del himno
+  showTitle: true,
+  titleFontSize: 28,
+  titleColor: '#C5A021',
+  
+  // Panel/Contenedor
+  showPanel: false,
+  panelBackground: '#000000',
+  panelOpacity: 0.3,
+  panelBorderColor: '#C5A021',
+  panelBlur: 16,
+  
+  // Posicionamiento
+  position: 'bottom',
+  horizontalAlignment: 'center',
+  verticalOffset: 0,
+  horizontalOffset: 0,
+  maxWidth: 1000,
+  
+  // Espaciado
+  padding: 20,
+  marginTop: 0,
+  marginBottom: 40,
+  marginLeft: 40,
+  marginRight: 40,
+  
+  // Efecto de fondo
+  showBackgroundGradient: false,
 };
 
 const CHANNEL_NAME = 'obs-hymn-display';

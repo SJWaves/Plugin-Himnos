@@ -28,124 +28,122 @@ export default function DisplayPage() {
     return () => broadcaster.close();
   }, []);
 
-  if (!display) return <div className="w-full h-screen bg-black" />;
+  if (!display) return <div className="w-full h-screen" style={{ backgroundColor: 'transparent' }} />;
 
-  const positionClasses = {
-    top: 'items-start pt-8 sm:pt-16 md:pt-24',
-    middle: 'items-center',
-    bottom: 'items-end pb-8 sm:pb-16 md:pb-24',
-  };
+  // Posición vertical
+  const verticalPositionStyle =
+    config.position === 'top'
+      ? { top: `${config.marginTop + config.verticalOffset}px` }
+      : config.position === 'middle'
+        ? { top: '50%', transform: 'translateY(-50%)' }
+        : { bottom: `${config.marginBottom + config.verticalOffset}px` };
 
-  const textAlignClasses = {
+  // Alineación horizontal
+  const horizontalAlignmentStyle =
+    config.horizontalAlignment === 'left'
+      ? { left: `${config.marginLeft + config.horizontalOffset}px` }
+      : config.horizontalAlignment === 'right'
+        ? { right: `${config.marginRight + config.horizontalOffset}px` }
+        : { left: '50%', transform: config.position === 'middle' ? 'translate(-50%, -50%)' : 'translateX(-50%)' };
+
+  const textAlignClass = {
     left: 'text-left',
     center: 'text-center',
     right: 'text-right',
-  };
+  }[config.textAlign];
 
   return (
     <div
-      className="w-full h-screen relative overflow-hidden"
-      style={{
-        fontFamily: config.fontFamily,
-        backgroundColor: config.screenBackgroundColor,
-      }}
+      className="w-full h-screen pointer-events-none"
+      style={{ backgroundColor: 'transparent', fontFamily: config.fontFamily }}
     >
-      {/* Fondo con gradiente sutil - solo si showGlassPanel */}
-      {config.showGlassPanel && (
+      {/* Efecto de gradiente sutil en el fondo (solo visual) */}
+      {config.showBackgroundGradient && (
         <div
           className="absolute inset-0"
           style={{
-            background: `radial-gradient(circle at center, rgba(197, 160, 33, 0.1) 0%, transparent 70%)`,
-            opacity: 0.3,
+            background: 'radial-gradient(circle at center, rgba(197, 160, 33, 0.1) 0%, transparent 70%)',
+            pointerEvents: 'none',
           }}
         />
       )}
 
-      {/* Texto del verso con efecto liquid glass */}
+      {/* Contenedor de texto posicionado */}
       <div
-        className={`w-full h-screen flex flex-col ${positionClasses[config.position]} justify-center px-4 sm:px-6 md:px-8 transition-opacity duration-300`}
+        className="absolute transition-all duration-300"
+        style={{
+          ...verticalPositionStyle,
+          ...horizontalAlignmentStyle,
+          maxWidth: `${config.maxWidth}px`,
+          padding: `${config.padding}px`,
+          width: 'fit-content',
+        }}
       >
+        {/* Panel opcional con efecto glass */}
         <div
-          className={`max-w-[95%] sm:max-w-[90%] md:max-w-[85%] ${textAlignClasses[config.textAlign]} mx-auto`}
+          style={{
+            background: config.showPanel
+              ? `rgba(${parseInt(config.panelBackground.slice(1, 3), 16)}, ${parseInt(config.panelBackground.slice(3, 5), 16)}, ${parseInt(config.panelBackground.slice(5, 7), 16)}, ${config.panelOpacity})`
+              : 'transparent',
+            backdropFilter: config.showPanel ? `blur(${config.panelBlur}px)` : 'none',
+            WebkitBackdropFilter: config.showPanel ? `blur(${config.panelBlur}px)` : 'none',
+            border: config.showPanel ? `1px solid ${config.panelBorderColor}40` : 'none',
+            borderRadius: config.showPanel ? '12px' : '0px',
+            padding: config.showPanel ? `${config.padding}px` : '0px',
+            boxShadow: config.showPanel
+              ? `0 8px 32px 0 rgba(0, 0, 0, 0.4)`
+              : 'none',
+          }}
         >
-          <div
-            className={`${config.showGlassPanel ? 'glass-golden rounded-2xl sm:rounded-3xl border' : ''} relative overflow-hidden`}
-            style={{
-              padding: `${config.padding}px`,
-              maxWidth: '900px',
-              margin: '0 auto',
-              background: config.showGlassPanel
-                ? `linear-gradient(
-                    135deg,
-                    rgba(197, 160, 33, 0.08) 0%,
-                    rgba(0, 0, 0, 0.5) 50%,
-                    rgba(197, 160, 33, 0.05) 100%
-                  )`
-                : 'transparent',
-              backdropFilter: config.showGlassPanel ? 'blur(16px)' : 'none',
-              WebkitBackdropFilter: config.showGlassPanel ? 'blur(16px)' : 'none',
-              border: config.showGlassPanel ? '1px solid rgba(197, 160, 33, 0.4)' : 'none',
-              boxShadow: config.showGlassPanel
-                ? `
-                    0 12px 40px 0 rgba(0, 0, 0, 0.6),
-                    0 0 0 1px rgba(197, 160, 33, 0.15) inset,
-                    0 4px 12px 0 rgba(197, 160, 33, 0.25) inset,
-                    0 0 60px rgba(197, 160, 33, 0.15)
-                  `
-                : 'none',
-            }}
-          >
-            {/* Brillo superior integrado - solo si showGlassPanel */}
-            {config.showGlassPanel && (
-              <div
-                className="absolute top-0 left-0 right-0 h-1/4 rounded-t-2xl sm:rounded-t-3xl opacity-40"
+          {/* Título del himno - opcional */}
+          {config.showTitle && (
+            <div className={`mb-4 ${textAlignClass}`}>
+              <h2
                 style={{
-                  background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, transparent 100%)',
-                  pointerEvents: 'none',
-                }}
-              />
-            )}
-
-            {/* Título del himno - siempre visible */}
-            <div className="relative text-center mb-6 sm:mb-8">
-              <h1
-                className="text-xl sm:text-2xl md:text-3xl font-bold text-accent-glow"
-                style={{
-                  textShadow: '0 2px 8px rgba(197, 160, 33, 0.5), 0 0 20px rgba(197, 160, 33, 0.3)',
+                  fontSize: `${config.titleFontSize}px`,
+                  color: config.titleColor,
+                  fontWeight: '700',
+                  textShadow: config.textShadow
+                    ? '2px 2px 4px rgba(0, 0, 0, 0.8)'
+                    : 'none',
+                  margin: 0,
                 }}
               >
                 Himno {display.hymnNumber} – {display.hymnTitle}
-              </h1>
+              </h2>
             </div>
+          )}
 
-            {/* Texto del verso */}
-            <div className="relative">
-                <p
-                  className="whitespace-pre-line leading-relaxed text-white"
-                  style={{
-                    fontSize: `clamp(1rem, ${config.fontSize / 30}vw, ${config.fontSize}px)`,
-                    color: config.textColor,
-                    textShadow: config.textShadow
-                      ? '3px 3px 6px rgba(0,0,0,0.9), 0 0 15px rgba(0,0,0,0.5)'
-                      : 'none',
-                    fontWeight: config.textColor === '#FFFFFF' ? '400' : '500',
-                    lineHeight: '1.4',
-                  }}
-                >
-                  {display.verseText}
-                </p>
-            </div>
+          {/* Texto del verso */}
+          <div className={textAlignClass}>
+            <p
+              style={{
+                fontSize: `${config.fontSize}px`,
+                color: config.textColor,
+                textShadow: config.textShadow
+                  ? '2px 2px 6px rgba(0, 0, 0, 0.9), 0 0 12px rgba(0, 0, 0, 0.6)'
+                  : 'none',
+                margin: 0,
+                lineHeight: '1.6',
+                whiteSpace: 'pre-line',
+                wordWrap: 'break-word',
+              }}
+            >
+              {display.verseText}
+            </p>
           </div>
         </div>
       </div>
 
-      {/* Indicador de página y estado */}
-      <div className="absolute bottom-4 sm:bottom-6 md:bottom-8 right-4 sm:right-5 md:right-8 text-white/30 text-xs sm:text-sm flex flex-col items-end gap-2">
-        <span className="font-mono">
-          {display.verseIndex + 1} / {config.fontSize}
-        </span>
-
-      </div>
+      {/* Indicador de debug - solo en desarrollo */}
+      {process.env.NODE_ENV === 'development' && (
+        <div
+          className="absolute bottom-2 right-2 text-white/30 text-xs font-mono bg-black/30 px-2 py-1 rounded pointer-events-auto"
+          style={{ backgroundColor: 'rgba(0,0,0,0.3)' }}
+        >
+          {display.verseIndex + 1} / {config.fontSize}px
+        </div>
+      )}
     </div>
   );
 }

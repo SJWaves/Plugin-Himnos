@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Search, Settings, Eye, EyeOff, Music, Sliders } from 'lucide-react';
+import { useEffect, useState, useRef } from 'react';
+import { Eye, EyeOff, Music, Search, Sliders, Bookmark, Trash2, ListMusic } from 'lucide-react';
 import { hymnbooks, searchHymns, Hymn } from '../data/hymns';
 import {
   HymnBroadcaster,
@@ -9,74 +9,168 @@ import {
 } from '../utils/broadcast';
 import { SettingsModal } from '../components/SettingsModal';
 
-type WindowTab = 'search' | 'hymn' | 'settings';
+type WindowTab = 'search' | 'hymn' | 'saved' | 'settings';
+
+interface SavedHymn {
+  hymnbookId: string;
+  hymnbookName: string;
+  hymn: Hymn;
+}
+
+const isSavedHymnEntry = (entry: unknown): entry is SavedHymn => {
+  if (!entry || typeof entry !== 'object') return false;
+  const candidate = entry as SavedHymn;
+  return (
+    typeof candidate.hymnbookId === 'string' &&
+    typeof candidate.hymnbookName === 'string' &&
+    candidate.hymn &&
+    typeof candidate.hymn.number === 'number' &&
+    typeof candidate.hymn.title === 'string' &&
+    Array.isArray(candidate.hymn.verses) &&
+    candidate.hymn.verses.every((verse) => typeof verse === 'string')
+  );
+};
+
+const loadSavedHymns = (): SavedHymn[] => {
+  if (typeof window === 'undefined' || typeof window.localStorage === 'undefined') return [];
+  const stored = window.localStorage.getItem('obs-saved-hymns');
+  if (!stored) return [];
+  try {
+    const parsed = JSON.parse(stored);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(isSavedHymnEntry);
+  } catch (error) {
+    console.warn('[ControlPage] limpieza de himnos guardados fallida:', error);
+    return [];
+  }
+};
 
 export default function ControlPage() {
   const [activeTab, setActiveTab] = useState<WindowTab>('search');
   const [hymnbookId, setHymnbookId] = useState('celebremos_su_gloria');
-  const [searchQuery, setSearchQuery] = useState('');
+  
+  const [hymnSearchQuery, setHymnSearchQuery] = useState('');
+  
   const [selectedHymn, setSelectedHymn] = useState<Hymn | null>(null);
   const [searchResults, setSearchResults] = useState<Hymn[]>([]);
+  
+  // activeVerseIndex = Lo que está en vivo en OBS
   const [activeVerseIndex, setActiveVerseIndex] = useState<number | null>(null);
+  // focusedVerseIndex = Lo que está resaltado localmente para navegar
+  const [focusedVerseIndex, setFocusedVerseIndex] = useState<number | null>(null);
+  
   const [showSettings, setShowSettings] = useState(false);
   const [config, setConfig] = useState<DisplayConfig>(getStoredConfig());
   const [broadcaster] = useState(() => new HymnBroadcaster());
 
-  // Búsqueda de himnos
-  useEffect(() => {
-    const results = searchHymns(hymnbookId, searchQuery);
-    // Ordenar por número
-    const sortedResults = results.sort((a, b) => a.number - b.number);
-    setSearchResults(sortedResults.slice(0, 20)); // Mostrar hasta 20 resultados
-  }, [searchQuery, hymnbookId]);
+  // Estado para los himnos guardados (persiste en localStorage)
+  const [savedHymns, setSavedHymns] = useState<SavedHymn[]>(() => loadSavedHymns());
 
-  // Navegación con teclado (flechas arriba/abajo) en la ventana del himno
+  const verseRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  // Guardar en localStorage cuando cambie la lista de guardados
+  useEffect(() => {
+    localStorage.setItem('obs-saved-hymns', JSON.stringify(savedHymns));
+  }, [savedHymns]);
+
+  // Cargar todos los himnos del himnario seleccionado para la búsqueda
+  useEffect(() => {
+    const results = searchHymns(hymnbookId, '');
+    const sortedResults = results.sort((a, b) => a.number - b.number);
+    setSearchResults(sortedResults);
+  }, [hymnbookId]);
+
+  // Atajos de teclado globales (Ctrl + 1, 2, 3, 4)
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey) {
+        if (e.key === '1') { e.preventDefault(); setActiveTab('search'); setShowSettings(false); }
+        if (e.key === '2') { e.preventDefault(); if (selectedHymn) setActiveTab('hymn'); setShowSettings(false); }
+        if (e.key === '3') { e.preventDefault(); setActiveTab('saved'); setShowSettings(false); }
+        if (e.key === '4') { e.preventDefault(); setActiveTab('settings'); }
+      }
+    };
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, [selectedHymn]);
+
+  // Navegación con teclado (solo en ventana de himno)
   useEffect(() => {
     if (activeTab !== 'hymn' || !selectedHymn) return;
-
+    
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey) return; // Evitar conflictos con los atajos globales
+
       if (e.key === 'ArrowDown') {
         e.preventDefault();
-        const nextIndex =
-          activeVerseIndex === null
-            ? 0
-            : Math.min(activeVerseIndex + 1, selectedHymn.verses.length - 1);
-        handleShowVerse(nextIndex);
-      } else if (e.key === 'ArrowUp') {
+        setFocusedVerseIndex((prev) => {
+          const next = Math.min((prev ?? -1) + 1, selectedHymn.verses.length - 1);
+          // Si ya está al aire, cambiar y transmitir automáticamente
+          if (activeVerseIndex !== null) handleShowVerse(next, false);
+          return next;
+        });
+        return;
+      }
+      if (e.key === 'ArrowUp') {
         e.preventDefault();
-        if (activeVerseIndex !== null && activeVerseIndex > 0) {
-          handleShowVerse(activeVerseIndex - 1);
+        setFocusedVerseIndex((prev) => {
+          const next = Math.max((prev ?? 0) - 1, 0);
+          // Si ya está al aire, cambiar y transmitir automáticamente
+          if (activeVerseIndex !== null) handleShowVerse(next, false);
+          return next;
+        });
+        return;
+      }
+      
+      // Enter y Punto (.) actúan como confirmación (Toggle al aire)
+      if (e.key === '.' || e.key === 'Enter') {
+        e.preventDefault();
+        if (activeVerseIndex !== null) {
+          handleHideAll(); // Si hay algo, lo quita
+        } else {
+          // Si no hay nada, pone al aire el que esté enfocado
+          handleShowVerse(focusedVerseIndex ?? 0, true);
         }
       }
     };
-
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [activeTab, selectedHymn, activeVerseIndex]);
+  }, [activeTab, selectedHymn, activeVerseIndex, focusedVerseIndex]);
 
-  const handleSelectHymn = (hymn: Hymn) => {
+  // Centrar el scroll en la estrofa enfocada (focused)
+  useEffect(() => {
+    if (focusedVerseIndex !== null && verseRefs.current[focusedVerseIndex]) {
+      verseRefs.current[focusedVerseIndex]?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      });
+    }
+  }, [focusedVerseIndex]);
+
+  const handleSelectHymn = (hymn: Hymn, bookId: string = hymnbookId) => {
+    setHymnbookId(bookId);
     setSelectedHymn(hymn);
     setActiveTab('hymn');
-    setSearchQuery('');
-    setSearchResults([]);
+    setHymnSearchQuery('');
     setActiveVerseIndex(null);
+    setFocusedVerseIndex(0); // Enfocar la primera estrofa por defecto, pero no transmitirla
     broadcaster.clearDisplay();
   };
 
-  const handleShowVerse = (verseIndex: number) => {
+  const handleShowVerse = (verseIndex: number, updateFocus: boolean = true) => {
     if (!selectedHymn) return;
-
+    const clampedIndex = Math.max(0, Math.min(verseIndex, selectedHymn.verses.length - 1));
     const display: HymnDisplay = {
       hymnbookId,
       hymnNumber: selectedHymn.number,
       hymnTitle: selectedHymn.title,
-      verseIndex,
-      verseText: selectedHymn.verses[verseIndex],
+      verseIndex: clampedIndex,
+      verseText: selectedHymn.verses[clampedIndex],
       config,
     };
-
     broadcaster.sendDisplay(display);
-    setActiveVerseIndex(verseIndex);
+    setActiveVerseIndex(clampedIndex);
+    if (updateFocus) setFocusedVerseIndex(clampedIndex);
   };
 
   const handleHideAll = () => {
@@ -90,33 +184,73 @@ export default function ControlPage() {
     broadcaster.sendConfig(updatedConfig);
   };
 
+  const toggleSaveHymn = () => {
+    if (!selectedHymn) return;
+    const isSaved = savedHymns.some(sh => sh.hymnbookId === hymnbookId && sh.hymn.number === selectedHymn.number);
+    if (isSaved) {
+      setSavedHymns(savedHymns.filter(sh => !(sh.hymnbookId === hymnbookId && sh.hymn.number === selectedHymn.number)));
+    } else {
+      setSavedHymns([...savedHymns, { hymnbookId, hymnbookName: hymnbooks[hymnbookId].name, hymn: selectedHymn }]);
+    }
+  };
+
+  const removeSavedHymn = (bookId: string, hymnNum: number, e: React.MouseEvent) => {
+    e.stopPropagation(); // Evitar que se seleccione el himno al hacer clic en borrar
+    setSavedHymns(savedHymns.filter(sh => !(sh.hymnbookId === bookId && sh.hymn.number === hymnNum)));
+  };
+
+  const filteredHymns = searchResults.filter(
+    (hymn) =>
+      hymn.title.toLowerCase().includes(hymnSearchQuery.toLowerCase()) ||
+      hymn.number.toString().includes(hymnSearchQuery)
+  );
+
   return (
-    <div className="w-full h-screen bg-black text-white flex flex-col">
-      {/* Header con Glassmorphism */}
-      <div className="glass-header p-4 sm:p-5 md:p-6">
-        <h1 className="text-2xl sm:text-3xl md:text-3xl font-bold text-accent-glow">
-          Control de Himnos
-        </h1>
-        <p className="text-xs sm:text-sm text-white/60 mt-1 sm:mt-2">
-          OBS Studio Plugin • Sistema de Himnos
-        </p>
+    <div className="w-full h-screen bg-[#050505] text-white overflow-hidden flex flex-col">
+      {/* Header (fixed) */}
+      <div className="flex-none z-20 bg-[#111111]/95 backdrop-blur border-b border-[#222] p-3">
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <h1 className="text-base font-bold text-[#C5A021] truncate leading-tight">
+              Control de Himnos
+            </h1>
+            <p className="text-[10px] text-white/50 truncate flex gap-2 mt-0.5">
+              <span>Ctrl+1 Búsqueda</span>
+              <span>Ctrl+2 Himno</span>
+              <span>Ctrl+3 Guardados</span>
+            </p>
+          </div>
+          <div className="hidden sm:block text-[10px] text-white/50 text-right leading-tight">
+            <div>↑ ↓ navega</div>
+            <div>
+              <span className="inline-flex items-center justify-center px-1.5 rounded bg-[#050505] border border-[#222] text-white/70">
+                . / ↵
+              </span>{' '}
+              transmite
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Main Content Area */}
-      <div className="flex-1 overflow-hidden flex flex-col">
-        <div className="flex-1 overflow-auto glass-scroll p-4 sm:p-5 md:p-6">
-          {/* Ventana de Búsqueda */}
+      {/* Content (Responsive, scroll interno manejado por pestañas) */}
+      <div className="flex-1 overflow-hidden relative">
+        <div className="w-full h-full">
+          
+          {/* Tab: Search */}
           {activeTab === 'search' && (
-            <div className="space-y-4 sm:space-y-5 md:space-y-6 pb-4">
-              {/* Selector de himnario */}
-              <div>
-                <label className="block text-xs sm:text-sm font-medium text-white/90 mb-2 sm:mb-3">
+            <div className="flex flex-col h-full p-3 space-y-3">
+              <div className="space-y-1.5 flex-none">
+                <label className="block text-[11px] font-medium text-white/70">
                   Himnario
                 </label>
                 <select
                   value={hymnbookId}
-                  onChange={(e) => setHymnbookId(e.target.value)}
-                  className="glass-input w-full px-3 sm:px-4 py-2 sm:py-3 text-white text-sm sm:text-base"
+                  onChange={(e) => {
+                    setHymnbookId(e.target.value);
+                    setHymnSearchQuery('');
+                  }}
+                  className="w-full rounded-md bg-[#111111] border border-[#222] px-2.5 py-1.5 text-white text-xs focus:outline-none focus:ring-1 focus:ring-[#C5A021]/50 focus:border-[#C5A021]/60 appearance-none [&>option]:bg-[#111111]"
+                  style={{ backgroundImage: 'url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%24%2024%22%20fill%3D%22none%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.5rem center', backgroundSize: '0.8rem' }}
                 >
                   {Object.entries(hymnbooks).map(([id, book]) => (
                     <option key={id} value={id}>
@@ -126,258 +260,326 @@ export default function ControlPage() {
                 </select>
               </div>
 
-              {/* Buscador */}
-              <div>
-                <label className="block text-xs sm:text-sm font-medium text-white/90 mb-2 sm:mb-3">
-                  Buscar Himno
-                </label>
-                <div className="relative">
-                  <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-accent/60" />
-                  <input
-                    type="text"
-                    placeholder="Número o título del himno..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="glass-input w-full pl-9 sm:pl-12 pr-3 sm:pr-4 py-2 sm:py-3 text-white text-sm sm:text-base"
-                    autoFocus
-                  />
-                </div>
+              <div className="relative flex-none">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#C5A021]/70" />
+                <input
+                  type="text"
+                  placeholder="Buscar número o título..."
+                  value={hymnSearchQuery}
+                  onChange={(e) => setHymnSearchQuery(e.target.value)}
+                  className="w-full bg-[#111111] border border-[#222] rounded-md pl-8 pr-3 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-[#C5A021]/50 placeholder:text-white/30"
+                  autoFocus
+                />
+              </div>
 
-                {/* Resultados con Glassmorphism */}
-                {searchResults.length > 0 && (
-                  <div className="mt-3 sm:mt-4 space-y-1 sm:space-y-2">
-                    {searchResults.map((hymn) => (
-                      <button
-                        key={hymn.number}
-                        onClick={() => handleSelectHymn(hymn)}
-                        className="glass-item w-full text-left px-3 sm:px-4 py-2 sm:py-3 transition-all hover:shadow-lg text-sm sm:text-base"
-                      >
-                        <div className="flex items-center gap-2 sm:gap-3">
-                          <span className="text-accent font-bold text-sm sm:text-lg min-w-[2.5rem] sm:min-w-[3.5rem]">
-                            #{hymn.number}
-                          </span>
-                          <span className="text-white/90 flex-1 truncate">
-                            {hymn.title}
-                          </span>
-                          <span className="text-white/40 text-xs sm:text-sm whitespace-nowrap">
-                            {hymn.verses.length} párr.
-                          </span>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                )}
-
-                {searchQuery && searchResults.length === 0 && (
-                  <div className="mt-6 text-center text-white/40 py-8">
-                    <Music className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2 sm:mb-3 opacity-50" />
-                    <p className="text-xs sm:text-sm">No se encontraron himnos</p>
-                  </div>
-                )}
-
-                {!searchQuery && searchResults.length === 0 && (
-                  <div className="mt-6 text-center text-white/40 py-8">
-                    <Music className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2 sm:mb-3 opacity-50" />
-                    <p className="text-xs sm:text-sm">Escribe el número o nombre de un himno</p>
+              {/* Lista integrada con Scroll interno (soluciona que se corte hacia abajo) */}
+              <div className="flex-1 overflow-y-auto rounded-md border border-[#222] bg-[#0A0A0A] [scrollbar-width:thin] [scrollbar-color:#333_#0A0A0A]">
+                {filteredHymns.length > 0 ? (
+                  filteredHymns.map((hymn) => (
+                    <button
+                      key={hymn.number}
+                      onClick={() => handleSelectHymn(hymn)}
+                      className="w-full text-left px-3 py-2 text-xs hover:bg-[#1A1A1A] focus:bg-[#1A1A1A] focus:outline-none transition-colors flex items-center gap-2 border-b border-[#222] last:border-0"
+                    >
+                      <span className="text-[#C5A021] font-bold min-w-[2.2rem]">#{hymn.number}</span>
+                      <span className="text-white/90 truncate flex-1">{hymn.title}</span>
+                    </button>
+                  ))
+                ) : (
+                  <div className="p-4 text-center text-[11px] text-white/40">
+                    No se encontraron himnos.
                   </div>
                 )}
               </div>
             </div>
           )}
 
-          {/* Ventana del Himno */}
+          {/* Tab: Saved (Guardados) */}
+          {activeTab === 'saved' && (
+            <div className="flex flex-col h-full p-3 space-y-3">
+              <div className="rounded-lg bg-[#111111] border border-[#222] p-3 flex items-center gap-2 flex-none">
+                <Bookmark className="w-4 h-4 text-[#C5A021]" />
+                <div>
+                  <h2 className="text-sm font-bold text-white">Himnos Guardados</h2>
+                  <p className="text-[10px] text-white/50">Lista rápida para la reunión de hoy</p>
+                </div>
+              </div>
+
+              <div className="flex-1 overflow-y-auto space-y-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pb-2">
+                {savedHymns.length === 0 ? (
+                  <div className="text-center p-6 border border-dashed border-[#222] rounded-lg">
+                    <p className="text-xs text-white/40">No hay himnos guardados aún.</p>
+                    <p className="text-[10px] text-white/30 mt-1">Busca un himno y usa el icono de guardar.</p>
+                  </div>
+                ) : (
+                  savedHymns.map((saved, idx) => (
+                    <div key={`${saved.hymnbookId}-${saved.hymn.number}-${idx}`} className="flex gap-2">
+                      <button
+                        onClick={() => handleSelectHymn(saved.hymn, saved.hymnbookId)}
+                        className="flex-1 text-left rounded-md bg-[#111111] border border-[#222] p-2 hover:border-[#C5A021]/50 transition-all focus:outline-none"
+                      >
+                        <div className="text-[9px] text-[#C5A021]/80 mb-0.5">{saved.hymnbookName}</div>
+                        <div className="flex items-center gap-2 text-xs">
+                          <span className="text-[#C5A021] font-bold">#{saved.hymn.number}</span>
+                          <span className="text-white/90 truncate">{saved.hymn.title}</span>
+                        </div>
+                      </button>
+                      <button
+                        onClick={(e) => removeSavedHymn(saved.hymnbookId, saved.hymn.number, e)}
+                        className="flex-none flex items-center justify-center px-3 rounded-md bg-[#111111] border border-[#222] text-red-400/70 hover:bg-red-950/30 hover:text-red-400 hover:border-red-900/50 transition-all"
+                        title="Eliminar de guardados"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Tab: Hymn */}
           {activeTab === 'hymn' && selectedHymn && (
-            <div className="space-y-4 sm:space-y-5 md:space-y-6 pb-4">
-              {/* Header del himno */}
-              <div className="glass-panel p-4 sm:p-5 md:p-6">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-3 sm:mb-4">
-                  <div className="flex-1">
-                    <span className="text-accent font-bold text-sm sm:text-base">
+            <div className="h-full overflow-y-auto p-3 space-y-3 pb-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+              <div className="rounded-lg bg-[#111111] border border-[#222] p-3 sticky top-0 z-10 shadow-md">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <div className="text-[10px] font-semibold text-[#C5A021]">
                       Himno #{selectedHymn.number}
-                    </span>
-                    <h2 className="text-xl sm:text-2xl font-bold text-white mt-1 sm:mt-2">
+                    </div>
+                    <h2 className="text-sm font-bold text-white mt-0.5 truncate">
                       {selectedHymn.title}
                     </h2>
                   </div>
-                  <button
-                    onClick={handleHideAll}
-                    className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg font-medium transition-all text-sm sm:text-base whitespace-nowrap ${
-                      activeVerseIndex !== null
-                        ? 'glass-button text-accent'
-                        : 'bg-[#333] text-white/40 cursor-not-allowed'
-                    }`}
-                    disabled={activeVerseIndex === null}
-                    title="Ocultar todo el himno del display"
-                  >
-                    <EyeOff className="w-3 h-3 sm:w-4 sm:h-4" />
-                    Ocultar
-                  </button>
-                </div>
-
-                <div className="glass-divider mt-3 sm:mt-4" />
-
-                {/* Instrucción de teclado */}
-                <div className="mt-3 sm:mt-4 p-2 sm:p-3 bg-accent/10 border border-accent/30 rounded-lg text-xs sm:text-sm text-white/80 text-center">
-                  💡 Usa <kbd className="px-2 py-1 bg-accent/20 rounded">↑</kbd> <kbd className="px-2 py-1 bg-accent/20 rounded">↓</kbd> para navegar entre párrafos • <kbd className="px-2 py-1 bg-accent/20 rounded">.</kbd> para ocultar/mostrar
+                  <div className="flex items-center gap-1.5 flex-none">
+                    <button
+                      onClick={toggleSaveHymn}
+                      className={`p-1.5 rounded-md border transition-colors focus:outline-none focus:ring-1 focus:ring-[#C5A021]/30 ${
+                        savedHymns.some(sh => sh.hymnbookId === hymnbookId && sh.hymn.number === selectedHymn.number)
+                          ? 'bg-[#C5A021]/20 border-[#C5A021] text-[#C5A021]'
+                          : 'bg-[#050505] border-[#222] text-white/50 hover:text-white'
+                      }`}
+                      title="Guardar himno"
+                    >
+                      <Bookmark className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={handleHideAll}
+                      disabled={activeVerseIndex === null}
+                      className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border transition-colors text-[11px] whitespace-nowrap focus:outline-none focus:ring-1 focus:ring-[#C5A021]/30 ${
+                        activeVerseIndex !== null
+                          ? 'bg-[#050505] border-[#222] text-white hover:border-[#C5A021]/60'
+                          : 'bg-[#0b0b0b] border-[#222] text-white/30 cursor-not-allowed'
+                      }`}
+                      title="Ocultar (Enter o .)"
+                    >
+                      <EyeOff className="w-3.5 h-3.5" />
+                      Ocultar
+                    </button>
+                  </div>
                 </div>
               </div>
 
-              {/* Lista de párrafos */}
-              <div className="space-y-1 sm:space-y-2">
-                {selectedHymn.verses.map((verse, index) => (
-                  <button
-                    key={index}
-                    onClick={() =>
-                      activeVerseIndex === index
-                        ? handleHideAll()
-                        : handleShowVerse(index)
-                    }
-                    className={`glass-item w-full text-left p-3 sm:p-4 transition-all ${
-                      activeVerseIndex === index ? 'active' : ''
-                    }`}
-                    title={`Mostrar párrafo ${index + 1} en el display`}
-                  >
-                    <div className="flex items-start gap-2 sm:gap-3 sm:gap-4">
-                      <div
-                        className={`min-w-[2rem] sm:min-w-[2.5rem] h-8 sm:h-10 rounded-lg flex items-center justify-center font-bold transition-colors flex-shrink-0 text-sm sm:text-base ${
-                          activeVerseIndex === index
-                            ? 'bg-accent text-black'
-                            : 'bg-white/10 text-white/60'
-                        }`}
-                      >
-                        {index + 1}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p
-                          className={`whitespace-pre-line leading-relaxed transition-colors text-xs sm:text-sm ${
-                            activeVerseIndex === index
-                              ? 'text-white'
-                              : 'text-white/70'
+              <div className="space-y-1.5">
+                {selectedHymn.verses.map((verse, index) => {
+                  const isActive = activeVerseIndex === index;
+                  const isFocused = focusedVerseIndex === index;
+                  
+                  return (
+                    <button
+                      key={index}
+                      ref={(el) => {
+                        verseRefs.current[index] = el;
+                      }}
+                      onClick={() => {
+                        if (isActive) {
+                          handleHideAll();
+                        } else {
+                          handleShowVerse(index, true);
+                        }
+                      }}
+                      className={`w-full text-left rounded-lg border p-2.5 transition-all focus:outline-none ${
+                        isActive
+                          ? 'bg-[#C5A021] border-[#C5A021] text-black shadow-[0_0_10px_rgba(197,160,33,0.2)]'
+                          : isFocused
+                            ? 'bg-[#151515] border-[#C5A021]/50 text-white' // Estilo para navegado (enfocado) pero no activo
+                            : 'bg-[#111111] border-[#222] text-white/90 hover:bg-[#151515] hover:border-[#C5A021]/30'
+                      }`}
+                    >
+                      <div className="flex items-start gap-2.5">
+                        <div
+                          className={`min-w-[1.75rem] h-6 rounded flex items-center justify-center font-bold text-[11px] ${
+                            isActive
+                              ? 'bg-black/10 text-black'
+                              : isFocused
+                                ? 'bg-[#C5A021]/20 text-[#C5A021]'
+                                : 'bg-[#050505] border border-[#222] text-white/60'
                           }`}
                         >
-                          {verse.slice(0, 80)}
-                          {verse.length > 80 ? '...' : ''}
-                        </p>
+                          {index + 1}
+                        </div>
+                        <div className="flex-1 min-w-0 pt-0.5">
+                          <p
+                            className={`whitespace-pre-line leading-snug text-[11px] sm:text-xs ${
+                              isActive ? 'text-black font-medium' : 'text-white/80'
+                            }`}
+                          >
+                            {verse}
+                          </p>
+                        </div>
+                        {isActive && (
+                          <Eye className="w-4 h-4 text-black/80 flex-shrink-0" />
+                        )}
                       </div>
-                      {activeVerseIndex === index && (
-                        <Eye className="w-4 h-4 sm:w-5 sm:h-5 text-accent flex-shrink-0 mt-1" />
-                      )}
-                    </div>
-                  </button>
-                ))}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}
 
-          {/* Ventana de Configuraciones */}
+          {/* Tab: Settings */}
           {activeTab === 'settings' && (
-            <div className="glass-panel p-4 sm:p-5 md:p-6 max-w-2xl">
-              <div className="flex items-center gap-3 mb-4 sm:mb-5 md:mb-6">
-                <Sliders className="w-5 h-5 sm:w-6 sm:h-6 text-accent" />
-                <h2 className="text-xl sm:text-2xl font-bold text-white">Configuración</h2>
-              </div>
-              
-              <div className="space-y-4 sm:space-y-5 md:space-y-6">
+            <div className="h-full overflow-y-auto p-3 space-y-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+              <div className="rounded-lg bg-[#111111] border border-[#222] p-3 flex items-center gap-2.5">
+                <div className="p-1.5 bg-[#1A1A1A] rounded-md">
+                  <Sliders className="w-4 h-4 text-[#C5A021]" />
+                </div>
                 <div>
-                  <label className="block text-xs sm:text-sm font-medium text-white/90 mb-2 sm:mb-3">
-                    Tamaño de Fuente
-                  </label>
+                  <h2 className="text-sm font-bold text-white">Configuración Visual</h2>
+                  <p className="text-[10px] text-white/50">Ajustes rápidos de la transmisión</p>
+                </div>
+              </div>
+
+              <div className="rounded-lg bg-[#111111] border border-[#222] p-3 space-y-4">
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <label className="block text-[11px] font-medium text-white/90">
+                      Tamaño de fuente
+                    </label>
+                    <span className="text-[10px] font-mono text-[#C5A021] bg-[#1A1A1A] px-1.5 py-0.5 rounded">
+                      {config.fontSize}px
+                    </span>
+                  </div>
                   <input
                     type="range"
                     min="24"
-                    max="120"
+                    max="150"
                     value={config.fontSize}
-                    onChange={(e) =>
-                      handleConfigChange({ fontSize: parseInt(e.target.value) })
-                    }
-                    className="w-full"
+                    onChange={(e) => handleConfigChange({ fontSize: parseInt(e.target.value) })}
+                    className="w-full h-1.5 rounded-lg appearance-none bg-[#222] accent-[#C5A021] cursor-pointer"
                   />
-                  <p className="text-xs text-white/50 mt-2">
-                    Actual: {config.fontSize}px
-                  </p>
                 </div>
 
-                <div>
-                  <label className="block text-xs sm:text-sm font-medium text-white/90 mb-2 sm:mb-3">
-                    Posición
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <label className="block text-[11px] font-medium text-white/90">
+                      Ancho del párrafo (Expandir texto)
+                    </label>
+                    <span className="text-[10px] font-mono text-[#C5A021] bg-[#1A1A1A] px-1.5 py-0.5 rounded">
+                      {config.maxWidth}px
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="400"
+                    max="3840"
+                    step="50"
+                    value={config.maxWidth}
+                    onChange={(e) => handleConfigChange({ maxWidth: parseInt(e.target.value) })}
+                    className="w-full h-1.5 rounded-lg appearance-none bg-[#222] accent-[#C5A021] cursor-pointer"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block text-[11px] font-medium text-white/90">
+                    Posición en pantalla
                   </label>
-                  <div className="space-y-1 sm:space-y-2">
-                    {['top', 'middle', 'bottom'].map((pos) => (
-                      <label key={pos} className="flex items-center gap-2 sm:gap-3 cursor-pointer text-xs sm:text-sm">
-                        <input
-                          type="radio"
-                          name="position"
-                          value={pos}
-                          checked={config.position === pos}
-                          onChange={(e) =>
-                            handleConfigChange({
-                              position: e.target.value as any,
-                            })
-                          }
-                          className="w-4 h-4"
-                        />
-                        <span className="text-white/80 capitalize">{pos}</span>
-                      </label>
-                    ))}
+                  <div className="grid grid-cols-3 gap-2">
+                    {(['top', 'middle', 'bottom'] as const).map((pos) => {
+                      const isSelected = config.position === pos;
+                      const labels = { top: 'Arriba', middle: 'Centro', bottom: 'Abajo' };
+                      return (
+                        <button
+                          key={pos}
+                          onClick={() => handleConfigChange({ position: pos as any })}
+                          className={`rounded-md border px-2 py-1.5 text-[11px] font-medium transition-all ${
+                            isSelected
+                              ? 'bg-[#C5A021] border-[#C5A021] text-black shadow-md shadow-[#C5A021]/20'
+                              : 'bg-[#050505] border-[#222] text-white/70 hover:border-[#C5A021]/50'
+                          }`}
+                        >
+                          {labels[pos]}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 
-                <button
-                  onClick={() => setShowSettings(true)}
-                  className="glass-button w-full py-2 sm:py-3 text-accent font-medium transitions-all hover:text-white text-sm sm:text-base"
-                >
-                  Más opciones
-                </button>
+                <div className="pt-1">
+                  <button
+                    onClick={() => setShowSettings(true)}
+                    className="w-full rounded-md bg-[#050505] border border-[#222] py-2 text-[#C5A021] font-medium text-[11px] hover:border-[#C5A021]/60 hover:bg-[#0A0A0A] transition-all"
+                  >
+                    Abrir opciones avanzadas
+                  </button>
+                </div>
               </div>
             </div>
           )}
         </div>
       </div>
 
-      {/* Bottom Navigation - Ventanas / Tabs */}
-      <div className="glass-tabs p-2 sm:p-3 md:p-4 flex gap-1 sm:gap-2 overflow-x-auto">
-        <button
-          onClick={() => {
-            setActiveTab('search');
-            setShowSettings(false);
-          }}
-          className={`glass-tab px-3 sm:px-4 py-2 sm:py-3 rounded-lg font-medium transition-all flex items-center gap-1 sm:gap-2 text-xs sm:text-sm whitespace-nowrap ${
-            activeTab === 'search' ? 'active' : ''
-          }`}
-        >
-          <Search className="w-3 h-3 sm:w-4 sm:h-4" />
-          Búsqueda
-        </button>
-
-        {selectedHymn && (
+      {/* Bottom nav (fixed) */}
+      <div className="flex-none z-20 bg-[#111111]/95 backdrop-blur border-t border-[#222] p-2 pb-safe">
+        <div className="max-w-3xl mx-auto flex items-center justify-around gap-1.5">
           <button
-            onClick={() => {
-              setActiveTab('hymn');
-              setShowSettings(false);
-            }}
-            className={`glass-tab px-3 sm:px-4 py-2 sm:py-3 rounded-lg font-medium transition-all flex items-center gap-1 sm:gap-2 text-xs sm:text-sm whitespace-nowrap ${
-              activeTab === 'hymn' ? 'active' : ''
+            onClick={() => { setActiveTab('search'); setShowSettings(false); }}
+            className={`flex-1 flex flex-col items-center justify-center py-1.5 rounded-md border transition-all ${
+              activeTab === 'search' ? 'bg-[#1A1A1A] border-[#C5A021]/50 text-[#C5A021]' : 'bg-[#050505] border-[#222] text-white/50 hover:text-white/80'
             }`}
+            title="Buscar (Ctrl+1)"
           >
-            <Music className="w-3 h-3 sm:w-4 sm:h-4" />
-            Himno
+            <Search className="w-4 h-4 mb-0.5" />
+            <span className="text-[9px]">Buscar</span>
           </button>
-        )}
 
-        <div className="flex-1" />
+          <button
+            onClick={() => { if (selectedHymn) { setActiveTab('hymn'); setShowSettings(false); } }}
+            disabled={!selectedHymn}
+            className={`flex-1 flex flex-col items-center justify-center py-1.5 rounded-md border transition-all ${
+              activeTab === 'hymn' ? 'bg-[#1A1A1A] border-[#C5A021]/50 text-[#C5A021]' : selectedHymn ? 'bg-[#050505] border-[#222] text-white/50 hover:text-white/80' : 'bg-[#050505] border-[#222] text-white/20 cursor-not-allowed'
+            }`}
+            title="Himno actual (Ctrl+2)"
+          >
+            <Music className="w-4 h-4 mb-0.5" />
+            <span className="text-[9px]">Himno</span>
+          </button>
 
-        <button
-          onClick={() => setActiveTab('settings')}
-          className={`glass-tab px-3 sm:px-4 py-2 sm:py-3 rounded-lg font-medium transition-all flex items-center gap-1 sm:gap-2 text-xs sm:text-sm whitespace-nowrap ${
-            activeTab === 'settings' ? 'active' : ''
-          }`}
-        >
-          <Sliders className="w-3 h-3 sm:w-4 sm:h-4" />
-          Configuración
-        </button>
+          <button
+            onClick={() => { setActiveTab('saved'); setShowSettings(false); }}
+            className={`flex-1 flex flex-col items-center justify-center py-1.5 rounded-md border transition-all ${
+              activeTab === 'saved' ? 'bg-[#1A1A1A] border-[#C5A021]/50 text-[#C5A021]' : 'bg-[#050505] border-[#222] text-white/50 hover:text-white/80'
+            }`}
+            title="Guardados (Ctrl+3)"
+          >
+            <ListMusic className="w-4 h-4 mb-0.5" />
+            <span className="text-[9px]">Guardados</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('settings')}
+            className={`flex-1 flex flex-col items-center justify-center py-1.5 rounded-md border transition-all ${
+              activeTab === 'settings' ? 'bg-[#1A1A1A] border-[#C5A021]/50 text-[#C5A021]' : 'bg-[#050505] border-[#222] text-white/50 hover:text-white/80'
+            }`}
+            title="Ajustes (Ctrl+4)"
+          >
+            <Sliders className="w-4 h-4 mb-0.5" />
+            <span className="text-[9px]">Ajustes</span>
+          </button>
+        </div>
       </div>
 
-      {/* Settings Modal */}
       <SettingsModal
         isOpen={showSettings}
         onClose={() => setShowSettings(false)}

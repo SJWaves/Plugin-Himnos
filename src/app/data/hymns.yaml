@@ -1,0 +1,154 @@
+celebremos_su_gloria:
+  name: Celebremos Su Gloria
+  hymns:
+    - number: 1
+      title: Santo, Santo, Santo
+      verses:
+        - |-
+          Santo, santo, santo, Señor omnipotente
+          Siempre el labio mío loores te dará
+        - |-
+          Santo, santo, santo, te adoro reverente
+          Dios en tres personas, bendita Trinidad
+        - |-
+          Santo, santo, santo, por más que estés velado
+          E imposible sea tu gloria contemplar
+        - |-
+          Santo tú eres solo, y nada hay a tu lado
+          En poder perfecto, pureza y caridad
+
+    - number: 3
+      title: Castillo Fuerte es Nuestro Dios
+      verses:
+        - |-
+          Castillo fuerte es nuestro Dios
+          Defensa y buen escudo
+        - |-
+          Con su poder nos librará
+          En este trance agudo
+        - |-
+          Con furia y con afán
+          Acósanos Satán
+        - |-
+          Por armas deja ver
+          Astucia y gran poder
+        - |-
+          Cual él no puede haber
+
+    - number: 30
+      title: Cristo Vive
+      verses:
+        - |-
+          Cristo vive, fuera el llanto
+          Cantos de triunfo dad
+        - |-
+          Cristo vive, sea nuestro canto
+          ¡Aleluya! en verdad
+        - |-
+          Él, que por nosotros padeció
+          Y en la cruz su sangre derramó
+        - |-
+          Hoy triunfante reina en gloria
+          ¡Aleluya! Él venció
+
+    - number: 45
+      title: Sublime Gracia
+      verses:
+        - |-
+          Sublime gracia del Señor
+          Que a un infeliz salvó
+        - |-
+          Fui ciego mas hoy miro yo
+          Perdido y Él me halló
+        - |-
+          Su gracia me enseñó a temer
+          Mis dudas ahuyentó
+        - |-
+          ¡Oh cuán precioso fue a mi ser
+          Al dar me Jesús perdón!
+        - |-
+          En los peligros o aflicción
+          Que yo he tenido aquí
+        - |-
+          Su gracia siempre me libró
+          Y me guiará feliz
+
+    - number: 112
+      title: Gracia Admirable
+      verses:
+        - |-
+          Gracia admirable de Jesús
+          Que mi alma rescató
+        - |-
+          Del mal camino me salvó
+          Y a Su redil me llamó
+        - |-
+          Gracia admirable, ¡cuán dulce es!
+          Que me salvó de la maldad
+        - |-
+          Gracia admirable, siempre fiel
+          Es Cristo mi Salvador
+
+    - number: 150
+      title: A Dios el Padre Celestial
+      verses:
+        - |-
+          A Dios el Padre celestial
+          Yo quiero cantar
+        - |-
+          Porque me ama con amor
+          Eterno y sin igual
+        - |-
+          En Cristo me adoptó
+          Y heredero me llamó
+        - |-
+          Por eso canto con fervor
+          Y a Él le doy mi amor
+
+suplementario:
+  name: Suplementario
+  hymns:
+    - number: 1
+      title: A Jehová Cantaré
+      verses:
+        - |-
+          A Jehová cantaré porque se ha magnificado grandemente
+          Echó en el mar al caballo y al jinete
+        - |-
+          Jehová es mi fortaleza y mi cántico
+          Ha sido mi salvación
+        - |-
+          Este es mi Dios, le alabaré
+          Dios de mi padre, le enaltaceré
+
+    - number: 15
+      title: Tuyo Soy Jesús
+      verses:
+        - |-
+          Tuyo soy Jesús, yo escuché tu voz
+          Con tu gran amor me llamaste a mí
+        - |-
+          No hay ya en este mundo nada que escoger
+          Solo quiero amarte y seguirte a Ti
+        - |-
+          Mi ser y mi vida están en Ti Señor
+          Haz que siempre viva para tu honor
+        - |-
+          Dame tus palabras de consolación
+          Y haz que de ti hable mi corazón
+
+    - number: 25
+      title: Tu Fidelidad
+      verses:
+        - |-
+          Tu fidelidad es grande
+          Tu fidelidad incomparable es
+        - |-
+          Nadie como Tú, bendito Dios
+          Grande es tu fidelidad
+        - |-
+          No cambian las estaciones
+          Sin que yo deje de ver
+        - |-
+          Que tu mano providente
+          Me cuida y sustenta en todo mi ser

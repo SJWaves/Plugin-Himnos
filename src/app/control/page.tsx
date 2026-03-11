@@ -206,12 +206,20 @@ export default function ControlPage() {
   );
 
   return (
-    <div className="w-full h-screen bg-[#050505] text-white overflow-hidden flex flex-col">
+    <div className="w-full h-screen bg-black text-white overflow-hidden flex flex-col relative">
+      {/* Fondo con gradiente decorativo estilo HomePage */}
+      <div
+        className="absolute inset-0 opacity-20 pointer-events-none z-0"
+        style={{
+          background: `radial-gradient(circle at center, rgba(197, 160, 33, 0.2) 0%, transparent 80%)`,
+        }}
+      />
+
       {/* Header (fixed) */}
-      <div className="flex-none z-20 bg-[#111111]/95 backdrop-blur border-b border-[#222] p-3">
+      <div className="flex-none z-20 glass-panel border-b border-accent/20 p-3 relative">
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
-            <h1 className="text-base font-bold text-[#C5A021] truncate leading-tight">
+            <h1 className="text-base font-bold text-accent-glow truncate leading-tight">
               Control de Himnos
             </h1>
             <p className="text-[10px] text-white/50 truncate flex gap-2 mt-0.5">
@@ -223,7 +231,7 @@ export default function ControlPage() {
           <div className="hidden sm:block text-[10px] text-white/50 text-right leading-tight">
             <div>↑ ↓ navega</div>
             <div>
-              <span className="inline-flex items-center justify-center px-1.5 rounded bg-[#050505] border border-[#222] text-white/70">
+              <span className="inline-flex items-center justify-center px-1.5 rounded glass-subtle border border-accent/20 text-white/70">
                 . / ↵
               </span>{' '}
               transmite
@@ -233,7 +241,7 @@ export default function ControlPage() {
       </div>
 
       {/* Content (Responsive, scroll interno manejado por pestañas) */}
-      <div className="flex-1 overflow-hidden relative">
+      <div className="flex-1 overflow-hidden relative z-10">
         <div className="w-full h-full">
           
           {/* Tab: Search */}
@@ -249,8 +257,8 @@ export default function ControlPage() {
                     setHymnbookId(e.target.value);
                     setHymnSearchQuery('');
                   }}
-                  className="w-full rounded-md bg-[#111111] border border-[#222] px-2.5 py-1.5 text-white text-xs focus:outline-none focus:ring-1 focus:ring-[#C5A021]/50 focus:border-[#C5A021]/60 appearance-none [&>option]:bg-[#111111]"
-                  style={{ backgroundImage: 'url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%24%2024%22%20fill%3D%22none%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.5rem center', backgroundSize: '0.8rem' }}
+                  className="w-full rounded-md glass-subtle border border-accent/20 px-2.5 py-1.5 text-white text-xs focus:outline-none focus:ring-1 focus:ring-accent/50 focus:border-accent/50 appearance-none [&>option]:bg-black"
+                  style={{ backgroundImage: 'url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%24%2024%22%20fill%3D%22none%22%20stroke%3D%22%23C5A021%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.5rem center', backgroundSize: '0.8rem' }}
                 >
                   {Object.entries(hymnbooks).map(([id, book]) => (
                     <option key={id} value={id}>
@@ -261,27 +269,27 @@ export default function ControlPage() {
               </div>
 
               <div className="relative flex-none">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#C5A021]/70" />
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-accent/70" />
                 <input
                   type="text"
                   placeholder="Buscar número o título..."
                   value={hymnSearchQuery}
                   onChange={(e) => setHymnSearchQuery(e.target.value)}
-                  className="w-full bg-[#111111] border border-[#222] rounded-md pl-8 pr-3 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-[#C5A021]/50 placeholder:text-white/30"
+                  className="w-full glass-subtle border border-accent/20 rounded-md pl-8 pr-3 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-accent/50 placeholder:text-white/30"
                   autoFocus
                 />
               </div>
 
-              {/* Lista integrada con Scroll interno (soluciona que se corte hacia abajo) */}
-              <div className="flex-1 overflow-y-auto rounded-md border border-[#222] bg-[#0A0A0A] [scrollbar-width:thin] [scrollbar-color:#333_#0A0A0A]">
+              {/* Lista integrada con Scroll interno */}
+              <div className="flex-1 overflow-y-auto rounded-md border border-accent/20 glass-panel [scrollbar-width:thin] [scrollbar-color:theme(colors.accent)_transparent]">
                 {filteredHymns.length > 0 ? (
                   filteredHymns.map((hymn) => (
                     <button
                       key={hymn.number}
                       onClick={() => handleSelectHymn(hymn)}
-                      className="w-full text-left px-3 py-2 text-xs hover:bg-[#1A1A1A] focus:bg-[#1A1A1A] focus:outline-none transition-colors flex items-center gap-2 border-b border-[#222] last:border-0"
+                      className="w-full text-left px-3 py-2 text-xs hover:bg-accent/10 focus:bg-accent/10 focus:outline-none transition-colors flex items-center gap-2 border-b border-accent/10 last:border-0"
                     >
-                      <span className="text-[#C5A021] font-bold min-w-[2.2rem]">#{hymn.number}</span>
+                      <span className="text-accent font-bold min-w-[2.2rem]">#{hymn.number}</span>
                       <span className="text-white/90 truncate flex-1">{hymn.title}</span>
                     </button>
                   ))
@@ -297,8 +305,8 @@ export default function ControlPage() {
           {/* Tab: Saved (Guardados) */}
           {activeTab === 'saved' && (
             <div className="flex flex-col h-full p-3 space-y-3">
-              <div className="rounded-lg bg-[#111111] border border-[#222] p-3 flex items-center gap-2 flex-none">
-                <Bookmark className="w-4 h-4 text-[#C5A021]" />
+              <div className="rounded-lg glass-panel border border-accent/20 p-3 flex items-center gap-2 flex-none">
+                <Bookmark className="w-4 h-4 text-accent" />
                 <div>
                   <h2 className="text-sm font-bold text-white">Himnos Guardados</h2>
                   <p className="text-[10px] text-white/50">Lista rápida para la reunión de hoy</p>
@@ -307,7 +315,7 @@ export default function ControlPage() {
 
               <div className="flex-1 overflow-y-auto space-y-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pb-2">
                 {savedHymns.length === 0 ? (
-                  <div className="text-center p-6 border border-dashed border-[#222] rounded-lg">
+                  <div className="text-center p-6 border border-dashed border-accent/30 rounded-lg glass-subtle">
                     <p className="text-xs text-white/40">No hay himnos guardados aún.</p>
                     <p className="text-[10px] text-white/30 mt-1">Busca un himno y usa el icono de guardar.</p>
                   </div>
@@ -316,17 +324,17 @@ export default function ControlPage() {
                     <div key={`${saved.hymnbookId}-${saved.hymn.number}-${idx}`} className="flex gap-2">
                       <button
                         onClick={() => handleSelectHymn(saved.hymn, saved.hymnbookId)}
-                        className="flex-1 text-left rounded-md bg-[#111111] border border-[#222] p-2 hover:border-[#C5A021]/50 transition-all focus:outline-none"
+                        className="flex-1 text-left rounded-md glass-subtle border border-accent/20 p-2 hover:border-accent/50 transition-all focus:outline-none"
                       >
-                        <div className="text-[9px] text-[#C5A021]/80 mb-0.5">{saved.hymnbookName}</div>
+                        <div className="text-[9px] text-accent/80 mb-0.5">{saved.hymnbookName}</div>
                         <div className="flex items-center gap-2 text-xs">
-                          <span className="text-[#C5A021] font-bold">#{saved.hymn.number}</span>
+                          <span className="text-accent font-bold">#{saved.hymn.number}</span>
                           <span className="text-white/90 truncate">{saved.hymn.title}</span>
                         </div>
                       </button>
                       <button
                         onClick={(e) => removeSavedHymn(saved.hymnbookId, saved.hymn.number, e)}
-                        className="flex-none flex items-center justify-center px-3 rounded-md bg-[#111111] border border-[#222] text-red-400/70 hover:bg-red-950/30 hover:text-red-400 hover:border-red-900/50 transition-all"
+                        className="flex-none flex items-center justify-center px-3 rounded-md glass-subtle border border-accent/20 text-red-400/70 hover:bg-red-500/20 hover:text-red-400 hover:border-red-500/50 transition-all"
                         title="Eliminar de guardados"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -341,10 +349,10 @@ export default function ControlPage() {
           {/* Tab: Hymn */}
           {activeTab === 'hymn' && selectedHymn && (
             <div className="h-full overflow-y-auto p-3 space-y-3 pb-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-              <div className="rounded-lg bg-[#111111] border border-[#222] p-3 sticky top-0 z-10 shadow-md">
+              <div className="rounded-lg glass-panel border border-accent/20 p-3 sticky top-0 z-10 shadow-md">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0 flex-1">
-                    <div className="text-[10px] font-semibold text-[#C5A021]">
+                    <div className="text-[10px] font-semibold text-accent">
                       Himno #{selectedHymn.number}
                     </div>
                     <h2 className="text-sm font-bold text-white mt-0.5 truncate">
@@ -354,10 +362,10 @@ export default function ControlPage() {
                   <div className="flex items-center gap-1.5 flex-none">
                     <button
                       onClick={toggleSaveHymn}
-                      className={`p-1.5 rounded-md border transition-colors focus:outline-none focus:ring-1 focus:ring-[#C5A021]/30 ${
+                      className={`p-1.5 rounded-md border transition-colors focus:outline-none focus:ring-1 focus:ring-accent/50 ${
                         savedHymns.some(sh => sh.hymnbookId === hymnbookId && sh.hymn.number === selectedHymn.number)
-                          ? 'bg-[#C5A021]/20 border-[#C5A021] text-[#C5A021]'
-                          : 'bg-[#050505] border-[#222] text-white/50 hover:text-white'
+                          ? 'bg-accent/20 border-accent/50 text-accent'
+                          : 'glass-subtle border-accent/20 text-white/50 hover:text-white'
                       }`}
                       title="Guardar himno"
                     >
@@ -366,10 +374,10 @@ export default function ControlPage() {
                     <button
                       onClick={handleHideAll}
                       disabled={activeVerseIndex === null}
-                      className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border transition-colors text-[11px] whitespace-nowrap focus:outline-none focus:ring-1 focus:ring-[#C5A021]/30 ${
+                      className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border transition-colors text-[11px] whitespace-nowrap focus:outline-none focus:ring-1 focus:ring-accent/50 ${
                         activeVerseIndex !== null
-                          ? 'bg-[#050505] border-[#222] text-white hover:border-[#C5A021]/60'
-                          : 'bg-[#0b0b0b] border-[#222] text-white/30 cursor-not-allowed'
+                          ? 'glass-subtle border-accent/40 text-white hover:border-accent'
+                          : 'bg-black/50 border-white/10 text-white/30 cursor-not-allowed'
                       }`}
                       title="Ocultar (Enter o .)"
                     >
@@ -398,22 +406,22 @@ export default function ControlPage() {
                           handleShowVerse(index, true);
                         }
                       }}
-                      className={`w-full text-left rounded-lg border p-2.5 transition-all focus:outline-none ${
+                      className={`w-full text-left rounded-lg border p-2.5 transition-all duration-300 focus:outline-none backdrop-blur-md ${
                         isActive
-                          ? 'bg-[#C5A021] border-[#C5A021] text-black shadow-[0_0_10px_rgba(197,160,33,0.2)]'
+                          ? 'bg-accent/15 border-accent/60 shadow-[0_0_20px_rgba(197,160,33,0.25)]' // <- Estética Premium Glass y Dorado Transparente
                           : isFocused
-                            ? 'bg-[#151515] border-[#C5A021]/50 text-white' // Estilo para navegado (enfocado) pero no activo
-                            : 'bg-[#111111] border-[#222] text-white/90 hover:bg-[#151515] hover:border-[#C5A021]/30'
+                            ? 'bg-white/10 border-white/30 text-white' 
+                            : 'bg-black/40 border-white/5 text-white/80 hover:bg-white/5 hover:border-white/20'
                       }`}
                     >
                       <div className="flex items-start gap-2.5">
                         <div
                           className={`min-w-[1.75rem] h-6 rounded flex items-center justify-center font-bold text-[11px] ${
                             isActive
-                              ? 'bg-black/10 text-black'
+                              ? 'bg-accent/20 text-accent border border-accent/30'
                               : isFocused
-                                ? 'bg-[#C5A021]/20 text-[#C5A021]'
-                                : 'bg-[#050505] border border-[#222] text-white/60'
+                                ? 'bg-white/20 text-white'
+                                : 'bg-black/50 border border-white/10 text-white/50'
                           }`}
                         >
                           {index + 1}
@@ -421,14 +429,14 @@ export default function ControlPage() {
                         <div className="flex-1 min-w-0 pt-0.5">
                           <p
                             className={`whitespace-pre-line leading-snug text-[11px] sm:text-xs ${
-                              isActive ? 'text-black font-medium' : 'text-white/80'
+                              isActive ? 'text-white font-semibold' : 'text-white/80'
                             }`}
                           >
                             {verse}
                           </p>
                         </div>
                         {isActive && (
-                          <Eye className="w-4 h-4 text-black/80 flex-shrink-0" />
+                          <Eye className="w-4 h-4 text-accent flex-shrink-0" />
                         )}
                       </div>
                     </button>
@@ -441,9 +449,9 @@ export default function ControlPage() {
           {/* Tab: Settings */}
           {activeTab === 'settings' && (
             <div className="h-full overflow-y-auto p-3 space-y-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-              <div className="rounded-lg bg-[#111111] border border-[#222] p-3 flex items-center gap-2.5">
-                <div className="p-1.5 bg-[#1A1A1A] rounded-md">
-                  <Sliders className="w-4 h-4 text-[#C5A021]" />
+              <div className="rounded-lg glass-panel border border-accent/20 p-3 flex items-center gap-2.5 relative z-10">
+                <div className="p-1.5 bg-accent/20 rounded-md">
+                  <Sliders className="w-4 h-4 text-accent" />
                 </div>
                 <div>
                   <h2 className="text-sm font-bold text-white">Configuración Visual</h2>
@@ -451,13 +459,15 @@ export default function ControlPage() {
                 </div>
               </div>
 
-              <div className="rounded-lg bg-[#111111] border border-[#222] p-3 space-y-4">
+              <div className="rounded-lg glass-panel border border-accent/20 p-3 space-y-5 relative z-10">
+                
+                {/* Sliders reparados (sin el appearance-none que los rompía) */}
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
                     <label className="block text-[11px] font-medium text-white/90">
                       Tamaño de fuente
                     </label>
-                    <span className="text-[10px] font-mono text-[#C5A021] bg-[#1A1A1A] px-1.5 py-0.5 rounded">
+                    <span className="text-[10px] font-mono text-accent bg-black/50 border border-accent/20 px-1.5 py-0.5 rounded">
                       {config.fontSize}px
                     </span>
                   </div>
@@ -466,17 +476,17 @@ export default function ControlPage() {
                     min="24"
                     max="150"
                     value={config.fontSize}
-                    onChange={(e) => handleConfigChange({ fontSize: parseInt(e.target.value) })}
-                    className="w-full h-1.5 rounded-lg appearance-none bg-[#222] accent-[#C5A021] cursor-pointer"
+                    onChange={(e) => handleConfigChange({ fontSize: parseInt(e.target.value) || 24 })}
+                    className="w-full cursor-pointer accent-accent"
                   />
                 </div>
 
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
                     <label className="block text-[11px] font-medium text-white/90">
-                      Ancho del párrafo (Expandir texto)
+                      Ancho del párrafo (Expandir)
                     </label>
-                    <span className="text-[10px] font-mono text-[#C5A021] bg-[#1A1A1A] px-1.5 py-0.5 rounded">
+                    <span className="text-[10px] font-mono text-accent bg-black/50 border border-accent/20 px-1.5 py-0.5 rounded">
                       {config.maxWidth}px
                     </span>
                   </div>
@@ -486,8 +496,8 @@ export default function ControlPage() {
                     max="3840"
                     step="50"
                     value={config.maxWidth}
-                    onChange={(e) => handleConfigChange({ maxWidth: parseInt(e.target.value) })}
-                    className="w-full h-1.5 rounded-lg appearance-none bg-[#222] accent-[#C5A021] cursor-pointer"
+                    onChange={(e) => handleConfigChange({ maxWidth: parseInt(e.target.value) || 1000 })}
+                    className="w-full cursor-pointer accent-accent"
                   />
                 </div>
 
@@ -502,11 +512,11 @@ export default function ControlPage() {
                       return (
                         <button
                           key={pos}
-                          onClick={() => handleConfigChange({ position: pos as any })}
+                          onClick={() => handleConfigChange({ position: pos })}
                           className={`rounded-md border px-2 py-1.5 text-[11px] font-medium transition-all ${
                             isSelected
-                              ? 'bg-[#C5A021] border-[#C5A021] text-black shadow-md shadow-[#C5A021]/20'
-                              : 'bg-[#050505] border-[#222] text-white/70 hover:border-[#C5A021]/50'
+                              ? 'bg-accent/20 border-accent/50 text-accent shadow-[0_0_10px_rgba(197,160,33,0.2)]'
+                              : 'glass-subtle border-accent/20 text-white/70 hover:border-accent/50'
                           }`}
                         >
                           {labels[pos]}
@@ -516,10 +526,10 @@ export default function ControlPage() {
                   </div>
                 </div>
 
-                <div className="pt-1">
+                <div className="pt-2">
                   <button
                     onClick={() => setShowSettings(true)}
-                    className="w-full rounded-md bg-[#050505] border border-[#222] py-2 text-[#C5A021] font-medium text-[11px] hover:border-[#C5A021]/60 hover:bg-[#0A0A0A] transition-all"
+                    className="w-full rounded-md glass-subtle border border-accent/30 py-2.5 text-accent font-medium text-[11px] transition-all hover:border-accent hover:bg-accent/10 focus:outline-none focus:ring-1 focus:ring-accent/50"
                   >
                     Abrir opciones avanzadas
                   </button>
@@ -531,12 +541,14 @@ export default function ControlPage() {
       </div>
 
       {/* Bottom nav (fixed) */}
-      <div className="flex-none z-20 bg-[#111111]/95 backdrop-blur border-t border-[#222] p-2 pb-safe">
+      <div className="flex-none z-20 glass-panel border-t border-accent/20 p-2 pb-safe relative">
         <div className="max-w-3xl mx-auto flex items-center justify-around gap-1.5">
           <button
             onClick={() => { setActiveTab('search'); setShowSettings(false); }}
-            className={`flex-1 flex flex-col items-center justify-center py-1.5 rounded-md border transition-all ${
-              activeTab === 'search' ? 'bg-[#1A1A1A] border-[#C5A021]/50 text-[#C5A021]' : 'bg-[#050505] border-[#222] text-white/50 hover:text-white/80'
+            className={`flex-1 flex flex-col items-center justify-center py-1.5 rounded-md border transition-all focus:outline-none ${
+              activeTab === 'search' 
+                ? 'glass-subtle border-accent/50 text-accent shadow-[0_0_10px_rgba(197,160,33,0.2)]' 
+                : 'bg-transparent border-transparent text-white/50 hover:text-white/80 hover:glass-subtle hover:border-accent/30'
             }`}
             title="Buscar (Ctrl+1)"
           >
@@ -547,8 +559,12 @@ export default function ControlPage() {
           <button
             onClick={() => { if (selectedHymn) { setActiveTab('hymn'); setShowSettings(false); } }}
             disabled={!selectedHymn}
-            className={`flex-1 flex flex-col items-center justify-center py-1.5 rounded-md border transition-all ${
-              activeTab === 'hymn' ? 'bg-[#1A1A1A] border-[#C5A021]/50 text-[#C5A021]' : selectedHymn ? 'bg-[#050505] border-[#222] text-white/50 hover:text-white/80' : 'bg-[#050505] border-[#222] text-white/20 cursor-not-allowed'
+            className={`flex-1 flex flex-col items-center justify-center py-1.5 rounded-md border transition-all focus:outline-none ${
+              activeTab === 'hymn' 
+                ? 'glass-subtle border-accent/50 text-accent shadow-[0_0_10px_rgba(197,160,33,0.2)]' 
+                : selectedHymn 
+                  ? 'bg-transparent border-transparent text-white/50 hover:text-white/80 hover:glass-subtle hover:border-accent/30' 
+                  : 'bg-transparent border-transparent text-white/20 cursor-not-allowed'
             }`}
             title="Himno actual (Ctrl+2)"
           >
@@ -558,8 +574,10 @@ export default function ControlPage() {
 
           <button
             onClick={() => { setActiveTab('saved'); setShowSettings(false); }}
-            className={`flex-1 flex flex-col items-center justify-center py-1.5 rounded-md border transition-all ${
-              activeTab === 'saved' ? 'bg-[#1A1A1A] border-[#C5A021]/50 text-[#C5A021]' : 'bg-[#050505] border-[#222] text-white/50 hover:text-white/80'
+            className={`flex-1 flex flex-col items-center justify-center py-1.5 rounded-md border transition-all focus:outline-none ${
+              activeTab === 'saved' 
+                ? 'glass-subtle border-accent/50 text-accent shadow-[0_0_10px_rgba(197,160,33,0.2)]' 
+                : 'bg-transparent border-transparent text-white/50 hover:text-white/80 hover:glass-subtle hover:border-accent/30'
             }`}
             title="Guardados (Ctrl+3)"
           >
@@ -569,8 +587,10 @@ export default function ControlPage() {
 
           <button
             onClick={() => setActiveTab('settings')}
-            className={`flex-1 flex flex-col items-center justify-center py-1.5 rounded-md border transition-all ${
-              activeTab === 'settings' ? 'bg-[#1A1A1A] border-[#C5A021]/50 text-[#C5A021]' : 'bg-[#050505] border-[#222] text-white/50 hover:text-white/80'
+            className={`flex-1 flex flex-col items-center justify-center py-1.5 rounded-md border transition-all focus:outline-none ${
+              activeTab === 'settings' 
+                ? 'glass-subtle border-accent/50 text-accent shadow-[0_0_10px_rgba(197,160,33,0.2)]' 
+                : 'bg-transparent border-transparent text-white/50 hover:text-white/80 hover:glass-subtle hover:border-accent/30'
             }`}
             title="Ajustes (Ctrl+4)"
           >

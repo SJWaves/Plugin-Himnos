@@ -11,6 +11,10 @@ export default defineConfig(({ command }) => ({
     react(),
     tailwindcss(),
   ],
+  build: {
+    outDir: 'docs',
+    emptyOutDir: true,
+  },
   resolve: {
     alias: {
       // Alias @ to the src directory

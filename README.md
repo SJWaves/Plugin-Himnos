@@ -101,4 +101,11 @@ Desarrollado para facilitar la presentación de himnos en transmisiones en vivo.
 
 **URL del Panel**: http://localhost:5173/control
 **URL del Display**: http://localhost:5173/display
+
+### 🌐 URL en GitHub Pages
+
+Si despliegas con GitHub Pages (proyecto `Plugin-Himnos`), las URLs quedan así:
+
+- **Panel**: `https://sjwaves.github.io/Plugin-Himnos/control`
+- **Display**: `https://sjwaves.github.io/Plugin-Himnos/display`
   

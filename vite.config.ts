@@ -12,7 +12,7 @@ export default defineConfig(({ command }) => ({
     tailwindcss(),
   ],
   build: {
-    outDir: 'docs',
+    outDir: 'dist',
     emptyOutDir: true,
   },
   resolve: {

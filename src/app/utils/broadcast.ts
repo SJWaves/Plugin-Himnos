@@ -1,4 +1,6 @@
-// Utilidad para comunicación entre el panel de control y el display usando BroadcastChannel API
+// Utilidad para comunicación entre el panel de control y el display.
+// Usa BroadcastChannel cuando está disponible y cae a un fallback por localStorage
+// para entornos (p. ej. algunos docks/browsers embebidos) donde BroadcastChannel no existe.
 
 export interface DisplayConfig {
   // Texto del himno
@@ -7,6 +9,7 @@ export interface DisplayConfig {
   textColor: string;
   textAlign: 'left' | 'center' | 'right';
   textShadow: boolean;
+  normalizeLineBreaks: boolean;
   
   // Título del himno
   showTitle: boolean;
@@ -54,6 +57,7 @@ export const DEFAULT_CONFIG: DisplayConfig = {
   textColor: '#FFFFFF',
   textAlign: 'center',
   textShadow: true,
+  normalizeLineBreaks: false,
   
   // Título del himno
   showTitle: true,
@@ -88,44 +92,152 @@ export const DEFAULT_CONFIG: DisplayConfig = {
 const CHANNEL_NAME = 'obs-hymn-display';
 const STORAGE_KEY = 'obs-hymn-current-display';
 const CONFIG_KEY = 'obs-hymn-config';
+const FALLBACK_BROADCAST_KEY = 'obs-hymn-broadcast-fallback';
+
+type ChannelMessage = { type: 'display' | 'config'; data: unknown };
+
+function safeLocalStorageSetItem(key: string, value: string) {
+  try {
+    if (typeof window === 'undefined' || typeof window.localStorage === 'undefined') return;
+    window.localStorage.setItem(key, value);
+  } catch (error) {
+    console.warn('[broadcast] localStorage.setItem falló:', error);
+  }
+}
+
+function safeLocalStorageGetItem(key: string): string | null {
+  try {
+    if (typeof window === 'undefined' || typeof window.localStorage === 'undefined') return null;
+    return window.localStorage.getItem(key);
+  } catch (error) {
+    console.warn('[broadcast] localStorage.getItem falló:', error);
+    return null;
+  }
+}
+
+function safeLocalStorageRemoveItem(key: string) {
+  try {
+    if (typeof window === 'undefined' || typeof window.localStorage === 'undefined') return;
+    window.localStorage.removeItem(key);
+  } catch (error) {
+    console.warn('[broadcast] localStorage.removeItem falló:', error);
+  }
+}
 
 export class HymnBroadcaster {
-  private channel: BroadcastChannel;
+  private channel: BroadcastChannel | null = null;
+  private storageListener: ((event: StorageEvent) => void) | null = null;
+  private onMessageCallback: ((message: any) => void) | null = null;
+  private readonly senderId: string;
 
   constructor() {
-    this.channel = new BroadcastChannel(CHANNEL_NAME);
+    this.senderId =
+      typeof crypto !== 'undefined' && 'randomUUID' in crypto
+        ? crypto.randomUUID()
+        : `sender_${Math.random().toString(16).slice(2)}`;
+
+    if (typeof window === 'undefined') return;
+
+    if (typeof BroadcastChannel !== 'undefined') {
+      try {
+        this.channel = new BroadcastChannel(CHANNEL_NAME);
+        return;
+      } catch (error) {
+        console.warn('[broadcast] BroadcastChannel no disponible, usando fallback:', error);
+        this.channel = null;
+      }
+    }
+
+    // Fallback: broadcast por localStorage + evento "storage".
+    // Nota: el evento "storage" NO se dispara en la misma pestaña, por eso
+    // hacemos también un "loopback" al callback si existe.
   }
 
   sendDisplay(display: HymnDisplay | null) {
-    this.channel.postMessage({ type: 'display', data: display });
+    this.postMessage({ type: 'display', data: display } satisfies ChannelMessage);
     // También guardamos en localStorage como respaldo
     if (display) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(display));
+      safeLocalStorageSetItem(STORAGE_KEY, JSON.stringify(display));
     } else {
-      localStorage.removeItem(STORAGE_KEY);
+      safeLocalStorageRemoveItem(STORAGE_KEY);
     }
   }
 
   sendConfig(config: DisplayConfig) {
-    this.channel.postMessage({ type: 'config', data: config });
-    localStorage.setItem(CONFIG_KEY, JSON.stringify(config));
+    this.postMessage({ type: 'config', data: config } satisfies ChannelMessage);
+    safeLocalStorageSetItem(CONFIG_KEY, JSON.stringify(config));
   }
 
   clearDisplay() {
     this.sendDisplay(null);
   }
 
+  private postMessage(message: ChannelMessage) {
+    if (this.channel) {
+      this.channel.postMessage(message);
+      return;
+    }
+
+    // Fallback por localStorage
+    safeLocalStorageSetItem(
+      FALLBACK_BROADCAST_KEY,
+      JSON.stringify({
+        senderId: this.senderId,
+        ts: Date.now(),
+        message,
+      }),
+    );
+
+    // Loopback (misma pestaña)
+    this.onMessageCallback?.(message);
+  }
+
   onMessage(callback: (message: any) => void) {
-    this.channel.onmessage = (event) => callback(event.data);
+    this.onMessageCallback = callback;
+
+    if (this.channel) {
+      this.channel.onmessage = (event) => callback(event.data);
+      return;
+    }
+
+    if (typeof window === 'undefined') return;
+    if (this.storageListener) return;
+
+    this.storageListener = (event: StorageEvent) => {
+      if (event.key !== FALLBACK_BROADCAST_KEY) return;
+      if (!event.newValue) return;
+      try {
+        const parsed = JSON.parse(event.newValue) as {
+          senderId?: string;
+          ts?: number;
+          message?: ChannelMessage;
+        };
+        if (!parsed?.message) return;
+        if (parsed.senderId && parsed.senderId === this.senderId) return;
+        callback(parsed.message);
+      } catch (error) {
+        console.warn('[broadcast] fallo al parsear mensaje fallback:', error);
+      }
+    };
+
+    window.addEventListener('storage', this.storageListener);
   }
 
   close() {
-    this.channel.close();
+    if (this.channel) {
+      this.channel.close();
+      this.channel = null;
+    }
+
+    if (typeof window !== 'undefined' && this.storageListener) {
+      window.removeEventListener('storage', this.storageListener);
+      this.storageListener = null;
+    }
   }
 }
 
 export function getCurrentDisplay(): HymnDisplay | null {
-  const stored = localStorage.getItem(STORAGE_KEY);
+  const stored = safeLocalStorageGetItem(STORAGE_KEY);
   if (!stored) return null;
   try {
     return JSON.parse(stored);
@@ -135,7 +247,7 @@ export function getCurrentDisplay(): HymnDisplay | null {
 }
 
 export function getStoredConfig(): DisplayConfig {
-  const stored = localStorage.getItem(CONFIG_KEY);
+  const stored = safeLocalStorageGetItem(CONFIG_KEY);
   if (!stored) return DEFAULT_CONFIG;
   try {
     return { ...DEFAULT_CONFIG, ...JSON.parse(stored) };

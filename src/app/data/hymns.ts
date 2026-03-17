@@ -13,60 +13,99 @@ export interface Hymnbook {
 }
 
 function parseHymnbooksFromYaml(yamlText: string): Record<string, Hymnbook> {
-  const parsed = parseYaml(yamlText) as unknown;
-  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-    throw new Error('El YAML no contiene un objeto raíz válido.');
+  console.log('YAML cargado, longitud:', yamlText?.length);
+  
+  if (!yamlText || yamlText.trim() === '') {
+    console.error('El archivo YAML está vacío');
+    return {};
   }
 
-  const hymnbooksFromYaml: Record<string, Hymnbook> = {};
-  for (const [id, hymnbook] of Object.entries(parsed as Record<string, any>)) {
-    if (!hymnbook || typeof hymnbook !== 'object' || Array.isArray(hymnbook)) {
-      throw new Error(`Himnario inválido: ${id}`);
-    }
-    if (typeof hymnbook.name !== 'string' || !Array.isArray(hymnbook.hymns)) {
-      throw new Error(`Estructura inválida en himnario: ${id}`);
-    }
-
-    hymnbooksFromYaml[id] = {
-      name: hymnbook.name,
-      hymns: hymnbook.hymns.map((h: any) => {
-        if (
-          !h ||
-          typeof h !== 'object' ||
-          typeof h.number !== 'number' ||
-          typeof h.title !== 'string' ||
-          !Array.isArray(h.verses) ||
-          !h.verses.every((v: any) => typeof v === 'string')
-        ) {
-          throw new Error(`Himno inválido en himnario: ${id}`);
+  try {
+    const parsed = parseYaml(yamlText) as unknown;
+    
+    // Función interna para procesar los versos y detectar el CORO
+    const processVerses = (verses: any[]): string[] => {
+      if (!Array.isArray(verses)) return [];
+      
+      return verses.map((v: any) => {
+        const text = String(v).trim();
+        // Si detecta "CORO" al inicio, le ponemos la marca especial @ para separar
+        if (text.toUpperCase().startsWith("CORO")) {
+          const lines = text.split('\n');
+          const header = lines[0].trim(); // "CORO"
+          const body = lines.slice(1).join('\n').trim(); // El resto del texto
+          // Usamos @CORO@ como un "ancla" que tu componente React usará para separar
+          return `@CORO@${header}\n${body}`;
         }
-        return { number: h.number, title: h.title, verses: h.verses };
-      }),
+        return text;
+      });
     };
-  }
 
-  return hymnbooksFromYaml;
+    // Caso 1: Array directo
+    if (Array.isArray(parsed)) {
+      return {
+        'default': {
+          name: 'Himnario',
+          hymns: parsed.map((h: any, index: number) => ({
+            number: typeof h.number === 'number' ? h.number : index + 1,
+            title: h.title || 'Sin título',
+            verses: processVerses(h.verses)
+          }))
+        }
+      };
+    }
+    
+    // Caso 2: Múltiples himnarios
+    if (parsed && typeof parsed === 'object') {
+      const hymnbooksFromYaml: Record<string, Hymnbook> = {};
+      
+      for (const [id, hymnbook] of Object.entries(parsed as Record<string, any>)) {
+        if (!hymnbook || typeof hymnbook !== 'object') continue;
+        
+        hymnbooksFromYaml[id] = {
+          name: hymnbook.name || id,
+          hymns: Array.isArray(hymnbook.hymns) 
+            ? hymnbook.hymns.map((h: any, index: number) => ({
+                number: typeof h.number === 'number' ? h.number : index + 1,
+                title: h.title || 'Sin título',
+                verses: processVerses(h.verses)
+              }))
+            : []
+        };
+      }
+      return hymnbooksFromYaml;
+    }
+    
+    return {};
+  } catch (err) {
+    console.error('Error parseando YAML:', err);
+    return {};
+  }
 }
 
 export const hymnbooks: Record<string, Hymnbook> = (() => {
   try {
     return parseHymnbooksFromYaml(hymnbooksYaml);
   } catch (err) {
-    console.error('[hymns] Error cargando hymns.yaml:', err);
+    console.error('[hymns] Error fatal cargando hymns.yaml:', err);
     return {};
   }
 })();
 
+// --- Funciones de búsqueda (sin cambios) ---
+
 export function searchHymns(hymnbookId: string, query: string): Hymn[] {
   const hymnbook = hymnbooks[hymnbookId];
   if (!hymnbook) return [];
-
   const normalizedQuery = query.toLowerCase().trim();
   if (!normalizedQuery) return hymnbook.hymns;
+  return hymnbook.hymns.filter((hymn) => 
+    hymn.number.toString().includes(normalizedQuery) || 
+    hymn.title.toLowerCase().includes(normalizedQuery)
+  );
+}
 
-  return hymnbook.hymns.filter((hymn) => {
-    const matchesNumber = hymn.number.toString().includes(normalizedQuery);
-    const matchesTitle = hymn.title.toLowerCase().includes(normalizedQuery);
-    return matchesNumber || matchesTitle;
-  });
+export function getHymnByNumber(hymnbookId: string, number: number): Hymn | undefined {
+  const hymnbook = hymnbooks[hymnbookId];
+  return hymnbook?.hymns.find(h => h.number === number);
 }

@@ -119,6 +119,21 @@ export function SettingsModal({
                 <span className="absolute left-0.5 top-0.5 w-3.5 h-3.5 bg-white rounded-full transition-transform peer-checked:translate-x-5"></span>
               </label>
             </div>
+
+            {/* Normalizar saltos */}
+            <div className="flex items-center justify-between text-xs mt-2">
+              <label className="font-medium text-white">Unir saltos (párrafos)</label>
+              <label className="relative inline-block w-10 h-5">
+                <input
+                  type="checkbox"
+                  checked={config.normalizeLineBreaks}
+                  onChange={(e) => onConfigChange({ normalizeLineBreaks: e.target.checked })}
+                  className="sr-only peer"
+                />
+                <span className="absolute inset-0 bg-[#555] rounded-full peer-checked:bg-[#C5A021] transition-colors"></span>
+                <span className="absolute left-0.5 top-0.5 w-3.5 h-3.5 bg-white rounded-full transition-transform peer-checked:translate-x-5"></span>
+              </label>
+            </div>
           </div>
 
           {/* ===== TÍTULO DEL HIMNO ===== */}
@@ -449,8 +464,8 @@ export function SettingsModal({
               </label>
               <input
                 type="range"
-                min="400"
-                max="1600"
+                min="180"
+                max="3840"
                 step="50"
                 value={config.maxWidth}
                 onChange={(e) => onConfigChange({ maxWidth: parseInt(e.target.value) })}

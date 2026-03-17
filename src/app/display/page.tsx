@@ -12,14 +12,41 @@ export default function DisplayPage() {
   const [config, setConfig] = useState<DisplayConfig>(getStoredConfig());
   const [broadcaster] = useState(() => new HymnBroadcaster());
 
+  const normalizeText = (text: string) => {
+    // Si es un coro marcado, normalizamos solo el cuerpo del texto tras la marca
+    if (text.includes('@CORO@')) {
+      const parts = text.split('\n');
+      const header = parts[0];
+      const body = parts.slice(1).join('\n');
+      
+      const normalizedBody = body.replace(/\r\n/g, '\n').split(/\n{2,}/g)
+        .map((block) => block.replace(/\n+/g, ' ').replace(/\s+/g, ' ').trim())
+        .filter(Boolean)
+        .join('\n\n');
+        
+      return `${header}\n${normalizedBody}`;
+    }
+
+    const blocks = text.replace(/\r\n/g, '\n').split(/\n{2,}/g);
+    return blocks
+      .map((block) => block.replace(/\n+/g, ' ').replace(/\s+/g, ' ').trim())
+      .filter(Boolean)
+      .join('\n\n');
+  };
+
   useEffect(() => {
     const initialDisplay = getCurrentDisplay();
-    if (initialDisplay) setDisplay(initialDisplay);
+    if (initialDisplay) {
+      setDisplay(initialDisplay);
+      if (initialDisplay.config) setConfig(initialDisplay.config);
+    }
 
     const broadcaster = new HymnBroadcaster();
     broadcaster.onMessage((message) => {
       if (message.type === 'display') {
-        setDisplay(message.data);
+        const next = message.data as HymnDisplay | null;
+        setDisplay(next);
+        if (next?.config) setConfig(next.config);
       } else if (message.type === 'config') {
         setConfig(message.data);
       }
@@ -30,7 +57,6 @@ export default function DisplayPage() {
 
   if (!display) return <div className="w-full h-screen" style={{ backgroundColor: 'transparent' }} />;
 
-  // Posición vertical
   const verticalPositionStyle =
     config.position === 'top'
       ? { top: `${config.marginTop + config.verticalOffset}px` }
@@ -38,7 +64,6 @@ export default function DisplayPage() {
         ? { top: '50%', transform: 'translateY(-50%)' }
         : { bottom: `${config.marginBottom + config.verticalOffset}px` };
 
-  // Alineación horizontal
   const horizontalAlignmentStyle =
     config.horizontalAlignment === 'left'
       ? { left: `${config.marginLeft + config.horizontalOffset}px` }
@@ -52,12 +77,18 @@ export default function DisplayPage() {
     right: 'text-right',
   }[config.textAlign];
 
+  const rawText = config.normalizeLineBreaks ? normalizeText(display.verseText) : display.verseText;
+
+  // Lógica de separación de CORO
+  const isCoro = rawText.includes('@CORO@');
+  const displayTitle = isCoro ? "Coro" : null;
+  const cleanVerseText = isCoro ? rawText.replace(/@CORO@CORO|@CORO@/g, '').trim() : rawText;
+
   return (
     <div
       className="w-full h-screen pointer-events-none"
       style={{ backgroundColor: 'transparent', fontFamily: config.fontFamily }}
     >
-      {/* Efecto de gradiente sutil en el fondo (solo visual) */}
       {config.showBackgroundGradient && (
         <div
           className="absolute inset-0"
@@ -68,7 +99,6 @@ export default function DisplayPage() {
         />
       )}
 
-      {/* Contenedor de texto posicionado */}
       <div
         className="absolute transition-all duration-300"
         style={{
@@ -79,7 +109,6 @@ export default function DisplayPage() {
           width: 'fit-content',
         }}
       >
-        {/* Panel opcional con efecto glass */}
         <div
           style={{
             background: config.showPanel
@@ -90,12 +119,10 @@ export default function DisplayPage() {
             border: config.showPanel ? `1px solid ${config.panelBorderColor}40` : 'none',
             borderRadius: config.showPanel ? '12px' : '0px',
             padding: config.showPanel ? `${config.padding}px` : '0px',
-            boxShadow: config.showPanel
-              ? `0 8px 32px 0 rgba(0, 0, 0, 0.4)`
-              : 'none',
+            boxShadow: config.showPanel ? `0 8px 32px 0 rgba(0, 0, 0, 0.4)` : 'none',
           }}
         >
-          {/* Título del himno - opcional */}
+          {/* Título del himno (Opcional en config) */}
           {config.showTitle && (
             <div className={`mb-4 ${textAlignClass}`}>
               <h2
@@ -103,9 +130,7 @@ export default function DisplayPage() {
                   fontSize: `${config.titleFontSize}px`,
                   color: config.titleColor,
                   fontWeight: '700',
-                  textShadow: config.textShadow
-                    ? '2px 2px 4px rgba(0, 0, 0, 0.8)'
-                    : 'none',
+                  textShadow: config.textShadow ? '2px 2px 4px rgba(0, 0, 0, 0.8)' : 'none',
                   margin: 0,
                 }}
               >
@@ -114,7 +139,25 @@ export default function DisplayPage() {
             </div>
           )}
 
-          {/* Texto del verso */}
+          {/* AJUSTE: Si es Coro, mostramos el indicador arriba */}
+          {isCoro && (
+            <div className={`${textAlignClass} mb-2`}>
+              <span
+                style={{
+                  fontSize: `${Math.max(config.fontSize * 0.5, 16)}px`,
+                  color: config.titleColor, // Usamos el color de título para el Coro
+                  fontStyle: 'italic',
+                  fontWeight: '600',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.1em'
+                }}
+              >
+                — {displayTitle} —
+              </span>
+            </div>
+          )}
+
+          {/* Texto del verso / cuerpo del coro */}
           <div className={textAlignClass}>
             <p
               style={{
@@ -129,21 +172,11 @@ export default function DisplayPage() {
                 wordWrap: 'break-word',
               }}
             >
-              {display.verseText}
+              {cleanVerseText}
             </p>
           </div>
         </div>
       </div>
-
-      {/* Indicador de debug - solo en desarrollo */}
-      {process.env.NODE_ENV === 'development' && (
-        <div
-          className="absolute bottom-2 right-2 text-white/30 text-xs font-mono bg-black/30 px-2 py-1 rounded pointer-events-auto"
-          style={{ backgroundColor: 'rgba(0,0,0,0.3)' }}
-        >
-          {display.verseIndex + 1} / {config.fontSize}px
-        </div>
-      )}
     </div>
   );
 }

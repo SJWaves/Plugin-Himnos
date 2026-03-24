@@ -1,111 +1,188 @@
+# Himnos OBS — Sistema de Himnos para OBS Studio
 
-# Plugin de Himnos para OBS Studio
+Panel de control y visualizador de himnos para transmisiones en vivo con OBS Studio. Tres vistas sincronizadas en tiempo real: panel de control para el operador, overlay transparente para OBS, y pantalla de proyección con fondos visuales.
 
-Un plugin moderno y elegante para mostrar letras de himnos durante transmisiones en vivo con OBS Studio. Diseñado con una interfaz glassmorphism premium y controles intuitivos.
+---
 
-## ✨ Características
+## 🗺️ Rutas de la Aplicación
 
-- 🎵 **Múltiples Himnarios**: Soporte para diferentes libros de himnos
-- 🎨 **Interfaz Glassmorphism**: Diseño moderno con efectos visuales elegantes
-- 📱 **Responsive**: Funciona perfectamente en diferentes resoluciones
-- ⚙️ **Configurable**: Personaliza colores, fuentes, posiciones y más
-- 🔄 **Tiempo Real**: Sincronización instantánea entre panel de control y display
-- 🎯 **Fácil Integración**: Compatible con Browser Source de OBS
+| Ruta | Propósito | Descripción |
+|---|---|---|
+| `/` | Página de inicio | URLs, instrucciones y acceso rápido a todas las vistas |
+| `/control` | Panel de control | Buscar himnos, navegar versos, ajustar configuración |
+| `/display` | Overlay para OBS | Browser Source transparente, texto superpuesto |
+| `/projection` | Pantalla de proyección | Vista independiente con fondos visuales degradados |
 
-## 🚀 Instalación y Uso
+---
 
-### 1. Clonar el Repositorio
+## ✨ Características Principales
+
+### 🎵 Datos
+- Más de 480 himnos en YAML organizados en múltiples himnarios
+- Detección automática de **Coro** y **Último Coro** con visual diferenciada
+- Búsqueda por número o título con filtro en tiempo real (atajo `Enter`)
+
+### 🖥️ Panel de Control (`/control`)
+- **5 pestañas** accesibles por teclado (`Ctrl+1` … `Ctrl+5`):
+  - **Buscar** — filtro en tiempo real, navegación con teclado
+  - **Himno** — vista de versos, atajo `.` para proyectar el verso activo
+  - **Guardados** — guardar y recuperar himnos frecuentes
+  - **Plantillas** — plantillas prediseñadas para display y proyección, guardar configuración personalizada
+  - **Ajustes** — configuración de display, proyección y UI
+- Scrollbar elegante y minimalista (3 px, tinte dorado, aparece al hover)
+
+### 📺 Display OBS (`/display`)
+- Fondo 100% transparente por defecto (ideal como Browser Source)
+- Layout ancho completo, texto alineado a la izquierda/centro/derecha
+- Animación `fadeInUp` suave al cambiar verso
+- Escala de fuente dinámica para que el texto nunca se corte
+- Panel de texto opcional con fondo semi-transparente y blur
+- Indicador visual **"— Coro —"** / **"— Último Coro —"**
+
+### 🎬 Proyección (`/projection`)
+- Vista independiente con **19 fondos de degradado CSS** en 5 categorías: Naturaleza, Cielo, Luz, Apacible, Espiritual
+- Fondo cambia automáticamente al proyectar un nuevo himno (configurable)
+- Contenido centrado con `maxWidth` controlable
+- Indicador visual de coro/último coro igual que el display
+- Configuración completamente independiente del display
+
+### 🎨 Plantillas
+**Display (9 plantillas):**
+- Minimalista — Solo texto / Texto con panel / Verso centrado
+- Alto Contraste — Contraste máximo / Coro destacado
+- Elegante — Clásico con serif / Moderno sin serif
+- Con Marca — Alineado izquierda / Con identificación
+
+**Proyección (8 plantillas):**
+- Clásico — Adoración Clásica / Proclamación
+- Espiritual — Celestial / Momentos Íntimos / Noche de Adoración
+- Luminoso — Gloria / Luz y Verdad
+- Moderno — Moderno Limpio
+
+Además: **guardar la configuración actual como plantilla personalizada**, almacenada en localStorage.
+
+---
+
+## ⌨️ Atajos de Teclado (Panel de Control)
+
+| Atajo | Acción |
+|---|---|
+| `Ctrl+1` | Pestaña Buscar |
+| `Ctrl+2` | Pestaña Himno |
+| `Ctrl+3` | Pestaña Guardados |
+| `Ctrl+4` | Pestaña Plantillas |
+| `Ctrl+5` | Pestaña Ajustes |
+| `Enter` | Ejecutar búsqueda |
+| `↑ / ↓` | Navegar versos del himno activo |
+| `.` (punto) | Proyectar verso activo al display |
+
+---
+
+## 🚀 Inicio Rápido
+
 ```bash
-git clone https://github.com/SJWaves/Plugin-Himnos.git
-cd Plugin-Himnos
-```
-
-### 2. Instalar Dependencias
-```bash
+cd frontend
 npm install
-```
-
-### 3. Desarrollar
-```bash
 npm run dev
 ```
 
-### 4. Construir para Producción
+Abre `http://localhost:5173` en tu navegador.
+
+### Backend (Opcional)
+
 ```bash
-npm run build
+cd backend
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+python run.py
 ```
+
+API en `http://localhost:8000`. El frontend funciona completamente sin backend usando `BroadcastChannel` y `localStorage`.
+
+---
 
 ## 📋 Configuración en OBS Studio
 
-### Panel de Control
-1. Abre OBS Studio
-2. Ve a `View` → `Docks` → `Custom Browser Docks`
-3. URL: `http://localhost:5173/control` (o tu URL de producción)
+### Agregar el Panel de Control como Dock
+1. OBS → `View` → `Docks` → `Custom Browser Docks`
+2. Nombre: `Himnos`, URL: `http://localhost:5173/control`
 
-### Vista de Display
-1. Agrega una nueva fuente: `Browser Source`
-2. URL: `http://localhost:5173/display` (o tu URL de producción)
-3. Configura el ancho y alto según tu escena
+### Agregar el Display como Browser Source
+1. Agrega fuente `Browser Source` en tu escena
+2. URL: `http://localhost:5173/display`
+3. Ancho: `1920`, Alto: `1080` (o tu resolución de escena)
+4. Desactiva **"Shutdown source when not visible"**
 
-## 🎛️ Funcionalidades
+### Vista de Proyección (pantalla separada)
+1. Abre `http://localhost:5173/projection` en un navegador aparte
+2. Mueve esa ventana a la pantalla del proyector
+3. Pon el navegador en pantalla completa (`F11`)
 
-### Panel de Control
-- 🔍 **Búsqueda**: Busca himnos por número o título
-- 📖 **Navegación**: Usa flechas ↑↓ para cambiar párrafos
-- ⚙️ **Configuración**: Personaliza apariencia y comportamiento
+---
 
-### Vista de Display
-- 📺 **Pantalla en Vivo**: Muestra himnos con efectos visuales
-- 🎨 **Personalizable**: Colores, fuentes, posiciones
-- 📐 **Responsive**: Se adapta a diferentes tamaños de pantalla
+## 🌐 URLs en GitHub Pages
+
+Si desplegás con GitHub Pages (proyecto `Plugin-Himnos`):
+
+| Vista | URL |
+|---|---|
+| Inicio | `https://sjwaves.github.io/Plugin-Himnos/` |
+| Panel | `https://sjwaves.github.io/Plugin-Himnos/control` |
+| Display OBS | `https://sjwaves.github.io/Plugin-Himnos/display` |
+| Proyección | `https://sjwaves.github.io/Plugin-Himnos/projection` |
+
+---
 
 ## 🛠️ Tecnologías
 
-- **Frontend**: React + TypeScript + Vite
-- **Styling**: Tailwind CSS + Custom Glassmorphism
-- **Comunicación**: BroadcastChannel API
-- **Build**: Vite
+| Capa | Stack |
+|---|---|
+| Frontend | React 18 + TypeScript, Vite 6, Tailwind CSS |
+| Estilos | Glassmorphism personalizado, variables CSS |
+| Comunicación | `BroadcastChannel` API, `localStorage` |
+| Datos | YAML + parser propio, sin base de datos |
+| Backend (opcional) | Python 3.11+, FastAPI, Pydantic, WebSockets |
+
+---
 
 ## 📁 Estructura del Proyecto
 
 ```
-src/
-├── app/
-│   ├── components/     # Componentes reutilizables
-│   ├── control/        # Panel de control
-│   ├── display/        # Vista de display
-│   ├── home/          # Página de inicio
-│   ├── routes.ts      # Configuración de rutas
-│   └── utils/         # Utilidades (broadcast, etc.)
-├── styles/            # Estilos CSS
-└── main.tsx          # Punto de entrada
+HIMNOS_OBS/
+├── frontend/
+│   └── src/
+│       ├── app/
+│       │   ├── control/page.tsx               # Panel de control (5 pestañas)
+│       │   ├── display/page.tsx               # Overlay OBS transparente
+│       │   ├── projection/page.tsx            # Vista proyector con degradados
+│       │   ├── home/page.tsx                  # Página de inicio
+│       │   ├── data/
+│       │   │   ├── hymns.yaml                 # +480 himnos en YAML
+│       │   │   └── hymns.ts                   # Parser + detección de Coro
+│       │   └── utils/broadcast.ts             # Tipos, BroadcastChannel, storage
+│       ├── shared/
+│       │   ├── constants/
+│       │   │   ├── templates.ts               # Plantillas display + proyección
+│       │   │   └── projection-backgrounds.ts  # 19 degradados CSS
+│       │   └── utils/text.ts                  # Normalización + limpieza @CORO@
+│       ├── services/hymns.ts                  # Servicio de carga de himnos
+│       └── styles/
+│           ├── glass.css                      # Glassmorphism + ctrl-scroll
+│           └── theme.css                      # Variables CSS / accent color
+├── backend/                                   # API Python opcional (FastAPI)
+├── docs/
+│   ├── GUIDE.md                               # Guía detallada del sistema
+│   └── himnos-estructura-incorrecta.txt       # Registro de himnos corregidos
+├── ARCHITECTURE.md
+└── README.md
 ```
-
-## 🤝 Contribuir
-
-1. Fork el proyecto
-2. Crea tu rama de feature (`git checkout -b feature/AmazingFeature`)
-3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abre un Pull Request
-
-## 📄 Licencia
-
-Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para más detalles.
-
-## 🙏 Créditos
-
-Desarrollado para facilitar la presentación de himnos en transmisiones en vivo.
 
 ---
 
-**URL del Panel**: http://localhost:5173/control
-**URL del Display**: http://localhost:5173/display
+## 📖 Documentación
 
-### 🌐 URL en GitHub Pages
-
-Si despliegas con GitHub Pages (proyecto `Plugin-Himnos`), las URLs quedan así:
-
-- **Panel**: `https://sjwaves.github.io/Plugin-Himnos/control`
-- **Display**: `https://sjwaves.github.io/Plugin-Himnos/display`
-  
+- [Guía Detallada del Sistema](./docs/GUIDE.md)
+- [Arquitectura del Proyecto](./ARCHITECTURE.md)
+- [Guías de Desarrollo](./guidelines/Guidelines.md)
+- [Registro de Himnos Corregidos](./docs/himnos-estructura-incorrecta.txt)

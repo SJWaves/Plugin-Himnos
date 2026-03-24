@@ -1,0 +1,49 @@
+HIMNOS CON ESTRUCTURA INCORRECTA
+=================================
+Revisión realizada: Marzo 2026
+Himnario: Celebremos Su Gloria
+
+Durante la auditoría del archivo YAML de himnos se identificaron 13 himnos
+que no siguen la estructura esperada: VERSO → CORO → VERSO → CORO → ...
+
+La estructura esperada es que cada verso sea seguido por su coro
+(o que al menos el coro alterne con los versos de forma consistente).
+Los problemas más comunes encontrados fueron:
+
+  1. CORO como primer elemento (antes del primer verso)
+  2. Versos al final sin coro después de ellos
+  3. Solo un coro para múltiples versos, colocado al final de todo
+
+
+LISTADO DE HIMNOS AFECTADOS
+-----------------------------
+
+#  | Nro | Título                           | Patrón detectado                    | Problema
+---|-----|----------------------------------|-------------------------------------|----------------------------------------------
+1  |  19 | Levantaos, Bendecid              | C→V→C→V→C                           | CORO como primer elemento
+2  |  80 | Adoradle                         | V→C→V→C→V→V                         | Últimos 2 versos sin coro después
+3  | 176 | Vida Abundante                   | C→V→C→V→C→V→C                       | CORO como primer elemento
+4  | 204 | Alzad la cruz                    | C→V→C→V→C→V→C→V→C                   | CORO como primer elemento
+5  | 255 | En un aposento alto              | V→C→...→V→V                         | Últimos 2 versos sin coro
+6  | 336 | Mi culpa él llevó                | V→C→...→V→V                         | Últimos 2 versos sin coro
+7  | 378 | Noble Sostén                     | V→C→V→C→V→V                         | Último verso sin coro
+8  | 379 | Anímate y esfuérzate             | C→V→C→V→C                           | CORO como primer elemento
+9  | 410 | Que mi vida entera esté          | V→V→V→V→V→C                         | Solo 1 coro para 5 versos, al final
+10 | 481 | Todo aquel que invocare          | C→V→V→V                             | CORO primero + versos sin alternación
+11 | 505 | Demos con alegría                | V→V→C                               | Solo 1 coro después de 2 versos
+12 | 525 | Vengan a la mesa                 | C→V→C→V→C→V→C                       | CORO como primer elemento
+13 | 547 | El cielo y la tierra pasarán     | C→V→C→V→C→V→C                       | CORO como primer elemento
+
+
+ESTADO DE CORRECCIÓN
+---------------------
+✅ Corregidos manualmente en hymns.yaml (Marzo 2026)
+
+
+CONVENCIÓN DE ETIQUETAS EN EL YAML
+------------------------------------
+Los elementos de tipo CORO en el YAML están marcados con una etiqueta especial
+que el parser convierte en identificador "@CORO@" al cargar los himnos.
+El orden de los elementos en el YAML determina el orden en que aparecen
+en el panel de control, por lo que la estructura afecta directamente
+la experiencia del operador durante la transmisión.

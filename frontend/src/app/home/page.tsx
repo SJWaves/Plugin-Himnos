@@ -22,7 +22,7 @@ export default function HomePage() {
             Plugin de Himnos
           </h1>
           <p className="text-sm sm:text-base md:text-lg lg:text-xl text-white/80 max-w-2xl mx-auto px-2">
-            Muestra letras de himnos en pantalla durante tus transmisiones en vivo con OBS Studio
+            Muestra las letras de himnos en pantalla durante tus transmisiones en vivo con OBS Studio
           </p>
         </div>
 

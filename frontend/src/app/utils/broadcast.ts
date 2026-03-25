@@ -86,8 +86,8 @@ export const DEFAULT_CONFIG: DisplayConfig = {
   padding: 20,
   marginTop: 0,
   marginBottom: 40,
-  marginLeft: 40,
-  marginRight: 40,
+  marginLeft: 0,
+  marginRight: 0,
   
   // Efecto de fondo
   showBackgroundGradient: false,
@@ -334,7 +334,14 @@ export function getStoredConfig(): DisplayConfig {
   const stored = safeLocalStorageGetItem(CONFIG_KEY);
   if (!stored) return DEFAULT_CONFIG;
   try {
-    return { ...DEFAULT_CONFIG, ...JSON.parse(stored) };
+    const parsed = JSON.parse(stored);
+    const merged = { ...DEFAULT_CONFIG, ...parsed };
+    // Migrate: 40/40 was the old hardcoded default — reset to edge-to-edge (0/0)
+    if (merged.marginLeft === 40 && merged.marginRight === 40) {
+      merged.marginLeft = 0;
+      merged.marginRight = 0;
+    }
+    return merged;
   } catch {
     return DEFAULT_CONFIG;
   }

@@ -11,6 +11,8 @@
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(var(--accent-rgb), 0.25);
   border-radius: 1rem;
+  will-change: transform;
+  isolation: isolate;
 }
 
 /* Glass with golden glow */
@@ -30,6 +32,8 @@
     0 2px 8px 0 rgba(var(--accent-rgb), 0.2) inset,
     0 0 40px rgba(var(--accent-rgb), 0.1);
   border-radius: 1.5rem;
+  will-change: transform;
+  isolation: isolate;
 }
 
 /* Glass panel - larger glass effect */
@@ -44,6 +48,8 @@
   border: 1px solid rgba(var(--accent-rgb), var(--glass-panel-border-a, 0.2));
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
   border-radius: var(--glass-panel-radius, 1.5rem);
+  will-change: transform;
+  isolation: isolate;
 }
 
 /* Subtle glass for secondary elements */
@@ -53,6 +59,8 @@
   -webkit-backdrop-filter: blur(var(--glass-subtle-blur, 8px));
   border: 1px solid rgba(var(--accent-rgb), var(--glass-subtle-border-a, 0.15));
   border-radius: var(--glass-subtle-radius, 0.875rem);
+  will-change: transform;
+  isolation: isolate;
 }
 
 /* Glass header with golden accent */

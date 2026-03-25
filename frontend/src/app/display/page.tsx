@@ -187,7 +187,6 @@ export default function DisplayPage() {
           ...verticalPositionStyle,
           left: `${config.marginLeft + config.horizontalOffset}px`,
           right: `${config.marginRight}px`,
-          padding: `${config.padding}px`,
         }}
       >
         <div
@@ -197,11 +196,9 @@ export default function DisplayPage() {
             background: config.showPanel
               ? `rgba(${parseInt(config.panelBackground.slice(1, 3), 16)}, ${parseInt(config.panelBackground.slice(3, 5), 16)}, ${parseInt(config.panelBackground.slice(5, 7), 16)}, ${config.panelOpacity})`
               : 'transparent',
-            backdropFilter: config.showPanel ? `blur(${config.panelBlur}px)` : 'none',
-            WebkitBackdropFilter: config.showPanel ? `blur(${config.panelBlur}px)` : 'none',
             border: config.showPanel ? `1px solid ${config.panelBorderColor}40` : 'none',
             borderRadius: config.showPanel ? '12px' : '0px',
-            padding: config.showPanel ? `${config.padding}px` : '0px',
+            padding: `${config.padding}px`,
             boxShadow: config.showPanel ? `0 8px 32px 0 rgba(0, 0, 0, 0.4)` : 'none',
           }}
         >

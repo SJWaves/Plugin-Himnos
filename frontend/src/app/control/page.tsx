@@ -2458,7 +2458,7 @@ export default function ControlPage() {
                               broadcaster.sendDisplay(display);
                             }
                           }}
-                          className="w-full rounded-lg glass-subtle border border-accent/30 p-3 text-left transition-all hover:border-accent/60 hover:bg-accent/5 focus:outline-none focus:ring-1 focus:ring-accent/50"
+                          className="w-full rounded-lg bg-black/40 border border-accent/30 p-3 text-left transition-all hover:border-accent/60 hover:bg-accent/5 focus:outline-none focus:ring-1 focus:ring-accent/50"
                         >
                           <div
                             className="h-10 rounded-md mb-2 flex items-center justify-center overflow-hidden border border-white/10"
@@ -2533,7 +2533,7 @@ export default function ControlPage() {
                               broadcaster.sendDisplay(display);
                             }
                           }}
-                          className="group relative rounded-lg glass-subtle border border-accent/20 p-3 text-left transition-all hover:border-accent/50 hover:bg-accent/5 focus:outline-none focus:ring-1 focus:ring-accent/50"
+                          className="group relative rounded-lg bg-black/40 border border-accent/20 p-3 text-left transition-all hover:border-accent/50 hover:bg-accent/5 focus:outline-none focus:ring-1 focus:ring-accent/50"
                         >
                           {/* Preview bar */}
                           <div 

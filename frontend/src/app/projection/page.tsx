@@ -218,8 +218,7 @@ export default function ProjectionPage() {
                 background: config.showPanel
                   ? toRgba(config.panelBackground, config.panelOpacity)
                   : 'transparent',
-                backdropFilter: config.showPanel ? `blur(${config.panelBlur}px)` : 'none',
-                WebkitBackdropFilter: config.showPanel ? `blur(${config.panelBlur}px)` : 'none',
+
                 border: config.showPanel
                   ? `1px solid ${toRgba(config.titleColor, 0.3)}`
                   : 'none',

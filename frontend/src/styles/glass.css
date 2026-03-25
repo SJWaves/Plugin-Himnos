@@ -1,77 +1,59 @@
 /* Glassmorphism Styles */
+/* NOTE: backdrop-filter removed from all classes — OBS Chromium compounds
+   nested blur passes through the element tree, causing golden tint buildup.
+   Solid semi-transparent backgrounds are used instead. */
 
-/* Base glass effect - translucent with blur */
+/* Base glass effect */
 .glass {
   background: linear-gradient(
     135deg,
-    rgba(0, 0, 0, 0.45) 0%,
-    rgba(0, 0, 0, 0.25) 100%
+    rgba(0, 0, 0, 0.60) 0%,
+    rgba(0, 0, 0, 0.45) 100%
   );
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(var(--accent-rgb), 0.25);
   border-radius: 1rem;
-  will-change: transform;
-  isolation: isolate;
 }
 
 /* Glass with golden glow */
 .glass-golden {
   background: linear-gradient(
     135deg,
-    rgba(var(--accent-rgb), 0.12) 0%,
-    rgba(0, 0, 0, 0.6) 50%,
-    rgba(var(--accent-rgb), 0.08) 100%
+    rgba(10, 10, 10, 0.85) 0%,
+    rgba(5, 5, 5, 0.90) 100%
   );
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(var(--accent-rgb), 0.35);
   box-shadow:
     0 8px 32px 0 rgba(0, 0, 0, 0.5),
-    0 0 0 1px rgba(var(--accent-rgb), 0.1) inset,
-    0 2px 8px 0 rgba(var(--accent-rgb), 0.2) inset,
-    0 0 40px rgba(var(--accent-rgb), 0.1);
+    0 0 0 1px rgba(var(--accent-rgb), 0.08) inset;
   border-radius: 1.5rem;
-  will-change: transform;
-  isolation: isolate;
 }
 
 /* Glass panel - larger glass effect */
 .glass-panel {
   background: linear-gradient(
     135deg,
-    rgba(0, 0, 0, var(--glass-panel-a1, 0.5)) 0%,
-    rgba(0, 0, 0, var(--glass-panel-a2, 0.3)) 100%
+    rgba(0, 0, 0, var(--glass-panel-a1, 0.70)) 0%,
+    rgba(0, 0, 0, var(--glass-panel-a2, 0.55)) 100%
   );
-  backdrop-filter: blur(var(--glass-panel-blur, 15px));
-  -webkit-backdrop-filter: blur(var(--glass-panel-blur, 15px));
   border: 1px solid rgba(var(--accent-rgb), var(--glass-panel-border-a, 0.2));
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
   border-radius: var(--glass-panel-radius, 1.5rem);
-  will-change: transform;
-  isolation: isolate;
 }
 
 /* Subtle glass for secondary elements */
 .glass-subtle {
-  background: rgba(0, 0, 0, var(--glass-subtle-a, 0.25));
-  backdrop-filter: blur(var(--glass-subtle-blur, 8px));
-  -webkit-backdrop-filter: blur(var(--glass-subtle-blur, 8px));
+  background: rgba(0, 0, 0, var(--glass-subtle-a, 0.50));
   border: 1px solid rgba(var(--accent-rgb), var(--glass-subtle-border-a, 0.15));
   border-radius: var(--glass-subtle-radius, 0.875rem);
-  will-change: transform;
-  isolation: isolate;
 }
 
 /* Glass header with golden accent */
 .glass-header {
   background: linear-gradient(
     135deg,
-    rgba(0, 0, 0, 0.6) 0%,
-    rgba(0, 0, 0, 0.4) 100%
+    rgba(0, 0, 0, 0.80) 0%,
+    rgba(0, 0, 0, 0.65) 100%
   );
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
   border-bottom: 2px solid rgba(var(--accent-rgb), 0.4);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
 }
@@ -83,8 +65,6 @@
     rgba(var(--accent-rgb), 0.2) 0%,
     rgba(var(--accent-rgb), 0.1) 100%
   );
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(var(--accent-rgb), 0.3);
   transition: all 0.3s ease;
   border-radius: 0.875rem;
@@ -111,9 +91,7 @@
 
 /* Glass input field */
 .glass-input {
-  background: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: rgba(0, 0, 0, 0.55);
   border: 1px solid rgba(var(--accent-rgb), 0.2);
   color: #ffffff;
   transition: all 0.3s ease;
@@ -134,11 +112,9 @@
 .glass-tabs {
   background: linear-gradient(
     135deg,
-    rgba(0, 0, 0, 0.4) 0%,
-    rgba(0, 0, 0, 0.2) 100%
+    rgba(0, 0, 0, 0.65) 0%,
+    rgba(0, 0, 0, 0.50) 100%
   );
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
   border-top: 1px solid rgba(var(--accent-rgb), 0.2);
   border-radius: 1.5rem 1.5rem 0 0;
 }

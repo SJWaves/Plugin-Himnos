@@ -19,13 +19,13 @@
   --accent-foreground: #000000;
   --destructive: #d4183d;
   --destructive-foreground: #ffffff;
-  --border: rgba(var(--accent-rgb), 0.2);
+  --border: rgba(197, 160, 33, 0.2);
   --input: #1a1a1a;
   --input-background: #1a1a1a;
   --switch-background: #C5A021;
   --font-weight-medium: 500;
   --font-weight-normal: 400;
-  --ring: var(--accent);
+  --ring: #C5A021;
   --chart-1: #C5A021;
   --chart-2: #999999;
   --chart-3: #666666;
@@ -35,8 +35,8 @@
   
   /* Glassmorphism colors */
   --glass-bg: rgba(0, 0, 0, 0.4);
-  --glass-border: rgba(var(--accent-rgb), 0.25);
-  --glass-glow: rgba(var(--accent-rgb), 0.2);
+  --glass-border: rgba(197, 160, 33, 0.25);
+  --glass-glow: rgba(197, 160, 33, 0.2);
   
   /* Sidebar */
   --sidebar: #0a0a0a;
@@ -45,7 +45,7 @@
   --sidebar-primary-foreground: #000000;
   --sidebar-accent: #C5A021;
   --sidebar-accent-foreground: #000000;
-  --sidebar-border: rgba(var(--accent-rgb), 0.2);
+  --sidebar-border: rgba(197, 160, 33, 0.2);
   --sidebar-ring: #C5A021;
 }
 
@@ -67,9 +67,9 @@
   --accent-foreground: #000000;
   --destructive: #d4183d;
   --destructive-foreground: #ffffff;
-  --border: rgba(var(--accent-rgb), 0.2);
+  --border: rgba(197, 160, 33, 0.2);
   --input: #1a1a1a;
-  --ring: var(--accent);
+  --ring: #C5A021;
   --font-weight-medium: 500;
   --font-weight-normal: 400;
   --chart-1: #C5A021;
@@ -83,7 +83,7 @@
   --sidebar-primary-foreground: #000000;
   --sidebar-accent: #C5A021;
   --sidebar-accent-foreground: #000000;
-  --sidebar-border: rgba(var(--accent-rgb), 0.2);
+  --sidebar-border: rgba(197, 160, 33, 0.2);
   --sidebar-ring: #C5A021;
 }
 

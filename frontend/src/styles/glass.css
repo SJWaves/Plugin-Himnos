@@ -10,7 +10,7 @@
     rgba(0, 0, 0, 0.60) 0%,
     rgba(0, 0, 0, 0.45) 100%
   );
-  border: 1px solid rgba(var(--accent-rgb), 0.25);
+  border: 1px solid rgba(197, 160, 33, 0.25);
   border-radius: 1rem;
 }
 
@@ -21,10 +21,10 @@
     rgba(10, 10, 10, 0.85) 0%,
     rgba(5, 5, 5, 0.90) 100%
   );
-  border: 1px solid rgba(var(--accent-rgb), 0.35);
+  border: 1px solid rgba(197, 160, 33, 0.35);
   box-shadow:
     0 8px 32px 0 rgba(0, 0, 0, 0.5),
-    0 0 0 1px rgba(var(--accent-rgb), 0.08) inset;
+    0 0 0 1px rgba(197, 160, 33, 0.08) inset;
   border-radius: 1.5rem;
 }
 
@@ -32,19 +32,19 @@
 .glass-panel {
   background: linear-gradient(
     135deg,
-    rgba(0, 0, 0, var(--glass-panel-a1, 0.70)) 0%,
-    rgba(0, 0, 0, var(--glass-panel-a2, 0.55)) 100%
+    rgba(0, 0, 0, 0.70) 0%,
+    rgba(0, 0, 0, 0.55) 100%
   );
-  border: 1px solid rgba(var(--accent-rgb), var(--glass-panel-border-a, 0.2));
+  border: 1px solid rgba(197, 160, 33, 0.2);
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
-  border-radius: var(--glass-panel-radius, 1.5rem);
+  border-radius: 1.5rem;
 }
 
 /* Subtle glass for secondary elements */
 .glass-subtle {
-  background: rgba(0, 0, 0, var(--glass-subtle-a, 0.50));
-  border: 1px solid rgba(var(--accent-rgb), var(--glass-subtle-border-a, 0.15));
-  border-radius: var(--glass-subtle-radius, 0.875rem);
+  background: rgba(0, 0, 0, 0.50);
+  border: 1px solid rgba(197, 160, 33, 0.15);
+  border-radius: 0.875rem;
 }
 
 /* Glass header with golden accent */
@@ -54,7 +54,7 @@
     rgba(0, 0, 0, 0.80) 0%,
     rgba(0, 0, 0, 0.65) 100%
   );
-  border-bottom: 2px solid rgba(var(--accent-rgb), 0.4);
+  border-bottom: 2px solid rgba(197, 160, 33, 0.4);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
 }
 
@@ -62,10 +62,10 @@
 .glass-button {
   background: linear-gradient(
     135deg,
-    rgba(var(--accent-rgb), 0.2) 0%,
-    rgba(var(--accent-rgb), 0.1) 100%
+    rgba(197, 160, 33, 0.2) 0%,
+    rgba(197, 160, 33, 0.1) 100%
   );
-  border: 1px solid rgba(var(--accent-rgb), 0.3);
+  border: 1px solid rgba(197, 160, 33, 0.3);
   transition: all 0.3s ease;
   border-radius: 0.875rem;
 }
@@ -73,34 +73,34 @@
 .glass-button:hover {
   background: linear-gradient(
     135deg,
-    rgba(var(--accent-rgb), 0.3) 0%,
-    rgba(var(--accent-rgb), 0.15) 100%
+    rgba(197, 160, 33, 0.3) 0%,
+    rgba(197, 160, 33, 0.15) 100%
   );
-  border-color: rgba(var(--accent-rgb), 0.5);
-  box-shadow: 0 4px 16px rgba(var(--accent-rgb), 0.2);
+  border-color: rgba(197, 160, 33, 0.5);
+  box-shadow: 0 4px 16px rgba(197, 160, 33, 0.2);
 }
 
 .glass-button:active {
   background: linear-gradient(
     135deg,
-    rgba(var(--accent-rgb), 0.4) 0%,
-    rgba(var(--accent-rgb), 0.2) 100%
+    rgba(197, 160, 33, 0.4) 0%,
+    rgba(197, 160, 33, 0.2) 100%
   );
-  border-color: rgba(var(--accent-rgb), 0.6);
+  border-color: rgba(197, 160, 33, 0.6);
 }
 
 /* Glass input field */
 .glass-input {
   background: rgba(0, 0, 0, 0.55);
-  border: 1px solid rgba(var(--accent-rgb), 0.2);
+  border: 1px solid rgba(197, 160, 33, 0.2);
   color: #ffffff;
   transition: all 0.3s ease;
   border-radius: 0.875rem;
 }
 
 .glass-input:focus {
-  border-color: rgba(var(--accent-rgb), 0.6);
-  box-shadow: 0 0 16px rgba(var(--accent-rgb), 0.2);
+  border-color: rgba(197, 160, 33, 0.6);
+  box-shadow: 0 0 16px rgba(197, 160, 33, 0.2);
   outline: none;
 }
 
@@ -115,7 +115,7 @@
     rgba(0, 0, 0, 0.65) 0%,
     rgba(0, 0, 0, 0.50) 100%
   );
-  border-top: 1px solid rgba(var(--accent-rgb), 0.2);
+  border-top: 1px solid rgba(197, 160, 33, 0.2);
   border-radius: 1.5rem 1.5rem 0 0;
 }
 
@@ -131,19 +131,19 @@
 
 .glass-tab:hover {
   color: rgba(255, 255, 255, 0.8);
-  background: rgba(var(--accent-rgb), 0.1);
+  background: rgba(197, 160, 33, 0.1);
 }
 
 .glass-tab.active {
-  color: var(--accent);
+  color: #C5A021;
   background: linear-gradient(
     135deg,
-    rgba(var(--accent-rgb), 0.15) 0%,
-    rgba(var(--accent-rgb), 0.05) 100%
+    rgba(197, 160, 33, 0.15) 0%,
+    rgba(197, 160, 33, 0.05) 100%
   );
-  border-bottom-color: var(--accent);
+  border-bottom-color: #C5A021;
   border-radius: 0.875rem 0.875rem 0 0;
-  box-shadow: 0 -2px 8px rgba(var(--accent-rgb), 0.15);
+  box-shadow: 0 -2px 8px rgba(197, 160, 33, 0.15);
 }
 
 /* Glass list item */
@@ -153,7 +153,7 @@
     rgba(0, 0, 0, 0.3) 0%,
     rgba(0, 0, 0, 0.15) 100%
   );
-  border: 1px solid rgba(var(--accent-rgb), 0.15);
+  border: 1px solid rgba(197, 160, 33, 0.15);
   transition: all 0.3s ease;
   border-radius: 0.875rem;
 }
@@ -161,29 +161,29 @@
 .glass-item:hover {
   background: linear-gradient(
     135deg,
-    rgba(var(--accent-rgb), 0.1) 0%,
+    rgba(197, 160, 33, 0.1) 0%,
     rgba(0, 0, 0, 0.2) 100%
   );
-  border-color: rgba(var(--accent-rgb), 0.3);
-  box-shadow: 0 4px 12px rgba(var(--accent-rgb), 0.1);
+  border-color: rgba(197, 160, 33, 0.3);
+  box-shadow: 0 4px 12px rgba(197, 160, 33, 0.1);
 }
 
 .glass-item.active {
   background: linear-gradient(
     135deg,
-    rgba(var(--accent-rgb), 0.2) 0%,
-    rgba(var(--accent-rgb), 0.1) 100%
+    rgba(197, 160, 33, 0.2) 0%,
+    rgba(197, 160, 33, 0.1) 100%
   );
-  border-color: rgba(var(--accent-rgb), 0.5);
-  box-shadow: 0 4px 16px rgba(var(--accent-rgb), 0.15);
+  border-color: rgba(197, 160, 33, 0.5);
+  box-shadow: 0 4px 16px rgba(197, 160, 33, 0.15);
 }
 
 /* Accent text with glow */
 .text-accent-glow {
-  color: var(--accent);
+  color: #C5A021;
   text-shadow:
-    0 0 20px rgba(var(--accent-rgb), 0.6),
-    0 0 40px rgba(var(--accent-rgb), 0.3),
+    0 0 20px rgba(197, 160, 33, 0.6),
+    0 0 40px rgba(197, 160, 33, 0.3),
     2px 2px 4px rgba(0, 0, 0, 0.8);
 }
 
@@ -198,19 +198,19 @@
 }
 
 .glass-scroll::-webkit-scrollbar-thumb {
-  background: rgba(var(--accent-rgb), 0.3);
+  background: rgba(197, 160, 33, 0.3);
   border-radius: 10px;
   transition: background 0.3s ease;
 }
 
 .glass-scroll::-webkit-scrollbar-thumb:hover {
-  background: rgba(var(--accent-rgb), 0.5);
+  background: rgba(197, 160, 33, 0.5);
 }
 
 /* Elegant minimal scrollbar — 3px, accent tint, fades in on hover */
 .ctrl-scroll {
   scrollbar-width: thin;
-  scrollbar-color: rgba(var(--accent-rgb), 0.22) transparent;
+  scrollbar-color: rgba(197, 160, 33, 0.22) transparent;
 }
 
 .ctrl-scroll::-webkit-scrollbar {
@@ -222,13 +222,13 @@
 }
 
 .ctrl-scroll::-webkit-scrollbar-thumb {
-  background: rgba(var(--accent-rgb), 0.22);
+  background: rgba(197, 160, 33, 0.22);
   border-radius: 99px;
   transition: background 0.25s ease;
 }
 
 .ctrl-scroll::-webkit-scrollbar-thumb:hover {
-  background: rgba(var(--accent-rgb), 0.5);
+  background: rgba(197, 160, 33, 0.5);
 }
 
 /* Decorative elements */
@@ -236,22 +236,63 @@
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(var(--accent-rgb), 0.3) 50%,
+    rgba(197, 160, 33, 0.3) 50%,
     transparent 100%
   );
   height: 1px;
 }
 
 /* Utility classes */
-.glass-blur {
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-}
-
 .glass-border {
-  border-color: rgba(var(--accent-rgb), 0.2);
+  border-color: rgba(197, 160, 33, 0.2);
 }
 
 .glass-shadow {
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
 }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   OBS / CEF compatibility overrides
+   Tailwind v4 generates color-mix(in oklab, ...) for opacity modifiers.
+   OBS's embedded Chromium does not support color-mix(), so every
+   bg-accent/20, border-accent/30 etc. would fall back to solid #C5A021.
+   These overrides replace them with standard rgba() that all Chromium versions
+   understand. accent = #C5A021 = rgb(197, 160, 33)
+   ───────────────────────────────────────────────────────────────────────── */
+
+/* background-color */
+.bg-accent\/0  { background-color: rgba(197, 160, 33, 0.00) !important; }
+.bg-accent\/5  { background-color: rgba(197, 160, 33, 0.05) !important; }
+.bg-accent\/10 { background-color: rgba(197, 160, 33, 0.10) !important; }
+.bg-accent\/15 { background-color: rgba(197, 160, 33, 0.15) !important; }
+.bg-accent\/20 { background-color: rgba(197, 160, 33, 0.20) !important; }
+.bg-accent\/30 { background-color: rgba(197, 160, 33, 0.30) !important; }
+.bg-accent\/50 { background-color: rgba(197, 160, 33, 0.50) !important; }
+
+.hover\:bg-accent\/5:hover  { background-color: rgba(197, 160, 33, 0.05) !important; }
+.hover\:bg-accent\/10:hover { background-color: rgba(197, 160, 33, 0.10) !important; }
+.hover\:bg-accent\/30:hover { background-color: rgba(197, 160, 33, 0.30) !important; }
+.hover\:bg-accent\/50:hover { background-color: rgba(197, 160, 33, 0.50) !important; }
+.group-hover\:bg-accent\/5 { background-color: rgba(197, 160, 33, 0.05) !important; }
+
+/* border-color */
+.border-accent\/10 { border-color: rgba(197, 160, 33, 0.10) !important; }
+.border-accent\/20 { border-color: rgba(197, 160, 33, 0.20) !important; }
+.border-accent\/30 { border-color: rgba(197, 160, 33, 0.30) !important; }
+.border-accent\/40 { border-color: rgba(197, 160, 33, 0.40) !important; }
+.border-accent\/50 { border-color: rgba(197, 160, 33, 0.50) !important; }
+.border-accent\/60 { border-color: rgba(197, 160, 33, 0.60) !important; }
+
+.hover\:border-accent\/30:hover { border-color: rgba(197, 160, 33, 0.30) !important; }
+.hover\:border-accent\/40:hover { border-color: rgba(197, 160, 33, 0.40) !important; }
+.hover\:border-accent\/50:hover { border-color: rgba(197, 160, 33, 0.50) !important; }
+.hover\:border-accent\/60:hover { border-color: rgba(197, 160, 33, 0.60) !important; }
+.focus\:border-accent\/50:focus { border-color: rgba(197, 160, 33, 0.50) !important; }
+
+/* ring/outline */
+.ring-accent\/50 { --tw-ring-color: rgba(197, 160, 33, 0.50); }
+.focus\:ring-accent\/50:focus { --tw-ring-color: rgba(197, 160, 33, 0.50); }
+
+/* text */
+.text-accent\/70 { color: rgba(197, 160, 33, 0.70) !important; }
+.text-accent\/80 { color: rgba(197, 160, 33, 0.80) !important; }

@@ -13,6 +13,7 @@ export default function DisplayPage() {
   const [broadcaster] = useState(() => new HymnBroadcaster());
   const [animationKey, setAnimationKey] = useState(0);
   const [scaledFontSize, setScaledFontSize] = useState(config.fontSize);
+  const [copied, setCopied] = useState(false); // Estado para feedback visual de copiado
   
   const containerRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
@@ -39,6 +40,19 @@ export default function DisplayPage() {
       .join('\n\n');
   };
 
+  // Función para copiar el título al portapapeles
+  const handleCopyTitle = () => {
+    if (!display) return;
+    const textToCopy = `Himno ${display.hymnNumber} – ${display.hymnTitle}`;
+    
+    navigator.clipboard.writeText(textToCopy).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000); // Resetea el estado después de 2 segundos
+    }).catch(err => {
+      console.error('Error al copiar:', err);
+    });
+  };
+
   useEffect(() => {
     const initialDisplay = getCurrentDisplay();
     if (initialDisplay) {
@@ -46,8 +60,8 @@ export default function DisplayPage() {
       if (initialDisplay.config) setConfig(initialDisplay.config);
     }
 
-    const broadcaster = new HymnBroadcaster();
-    broadcaster.onMessage((message) => {
+    const broadcasterInstance = new HymnBroadcaster();
+    broadcasterInstance.onMessage((message) => {
       if (message.type === 'display') {
         const next = message.data as HymnDisplay | null;
         setDisplay(next);
@@ -58,7 +72,7 @@ export default function DisplayPage() {
       }
     });
 
-    return () => broadcaster.close();
+    return () => broadcasterInstance.close();
   }, []);
 
   // Dynamic font scaling based on container height
@@ -138,7 +152,7 @@ export default function DisplayPage() {
     left: 'text-left',
     center: 'text-center',
     right: 'text-right',
-  }[config.textAlign];
+  }[config.textAlign] || 'text-center';
 
   const rawText = config.normalizeLineBreaks ? normalizeText(display.verseText) : display.verseText;
 
@@ -202,9 +216,13 @@ export default function DisplayPage() {
             boxShadow: config.showPanel ? `0 8px 32px 0 rgba(0, 0, 0, 0.4)` : 'none',
           }}
         >
-          {/* Título del himno (Opcional en config) */}
+          {/* Título del himno con función de copiar */}
           {config.showTitle && (
-            <div className={`mb-4 ${textAlignClass}`}>
+            <div 
+              className={`mb-4 ${textAlignClass} pointer-events-auto cursor-pointer group relative`}
+              onClick={handleCopyTitle}
+              title="Haz clic para copiar el título"
+            >
               <h2
                 style={{
                   fontSize: `${config.titleFontSize}px`,
@@ -212,9 +230,19 @@ export default function DisplayPage() {
                   fontWeight: '700',
                   textShadow: config.textShadow ? '2px 2px 4px rgba(0, 0, 0, 0.8)' : 'none',
                   margin: 0,
+                  transition: 'opacity 0.2s ease-in-out',
                 }}
+                className="group-hover:opacity-80"
               >
                 Himno {display.hymnNumber} – {display.hymnTitle}
+                
+                {/* Indicador visual de copiado */}
+                <span 
+                  className="inline-block ml-2 text-sm align-middle opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                  style={{ color: config.titleColor }}
+                >
+                  {copied ? '✓ Copiado' : '📋'}
+                </span>
               </h2>
             </div>
           )}

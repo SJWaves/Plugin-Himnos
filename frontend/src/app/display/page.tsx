@@ -41,16 +41,47 @@ export default function DisplayPage() {
   };
 
   // Función para copiar el título al portapapeles
-  const handleCopyTitle = () => {
+  const handleCopyTitle = async () => {
     if (!display) return;
+
     const textToCopy = `Himno ${display.hymnNumber} – ${display.hymnTitle}`;
-    
-    navigator.clipboard.writeText(textToCopy).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000); // Resetea el estado después de 2 segundos
-    }).catch(err => {
-      console.error('Error al copiar:', err);
-    });
+
+    try {
+      if (navigator?.clipboard?.writeText && window.isSecureContext) {
+        await navigator.clipboard.writeText(textToCopy);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+        return;
+      }
+    } catch (error) {
+      console.warn('Clipboard API no disponible en este contexto, intentando fallback:', error);
+    }
+
+    if (typeof document === 'undefined') return;
+
+    const textarea = document.createElement('textarea');
+    textarea.value = textToCopy;
+    textarea.setAttribute('readonly', '');
+    textarea.style.position = 'fixed';
+    textarea.style.top = '-9999px';
+    textarea.style.left = '-9999px';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    textarea.focus();
+    textarea.select();
+    textarea.setSelectionRange(0, textarea.value.length);
+
+    try {
+      const success = document.execCommand('copy');
+      if (success) {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }
+    } catch (error) {
+      console.error('Error al copiar desde fallback:', error);
+    } finally {
+      document.body.removeChild(textarea);
+    }
   };
 
   useEffect(() => {

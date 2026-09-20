@@ -599,21 +599,46 @@ export default function ControlPage() {
 
     const textToCopy = `Himno #${selectedHymn.number}. ${selectedHymn.title}`;
 
-    try {
-      if (navigator?.clipboard?.writeText) {
-        await navigator.clipboard.writeText(textToCopy);
-      } else if (typeof document !== 'undefined') {
-        const textarea = document.createElement('textarea');
-        textarea.value = textToCopy;
-        textarea.setAttribute('readonly', '');
-        textarea.style.position = 'fixed';
-        textarea.style.opacity = '0';
-        document.body.appendChild(textarea);
-        textarea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textarea);
+    const copyText = async (value: string) => {
+      try {
+        if (navigator?.clipboard?.writeText && window.isSecureContext) {
+          await navigator.clipboard.writeText(value);
+          return true;
+        }
+      } catch (error) {
+        console.warn('[ControlPage] clipboard API falló, intentando fallback:', error);
       }
-      setCopyConfirmation(true);
+
+      if (typeof document === 'undefined') return false;
+
+      const textarea = document.createElement('textarea');
+      textarea.value = value;
+      textarea.setAttribute('readonly', '');
+      textarea.style.position = 'fixed';
+      textarea.style.top = '-9999px';
+      textarea.style.left = '-9999px';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.focus();
+      textarea.select();
+      textarea.setSelectionRange(0, textarea.value.length);
+
+      let copied = false;
+      try {
+        copied = document.execCommand('copy');
+      } catch (error) {
+        console.warn('[ControlPage] fallback de copia falló:', error);
+      }
+
+      document.body.removeChild(textarea);
+      return copied;
+    };
+
+    try {
+      const copied = await copyText(textToCopy);
+      if (copied) {
+        setCopyConfirmation(true);
+      }
     } catch (error) {
       console.warn('[ControlPage] no se pudo copiar el himno:', error);
     }

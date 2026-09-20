@@ -5,6 +5,7 @@ Centralized configuration management using pydantic-settings.
 """
 
 from functools import lru_cache
+from pathlib import Path
 from typing import List
 from pydantic_settings import BaseSettings
 
@@ -32,7 +33,9 @@ class Settings(BaseSettings):
     ]
     
     # Hymns Data
-    HYMNS_YAML_PATH: str = "../frontend/src/app/data/hymns.yaml"
+    HYMNS_YAML_PATH: str = str(
+        Path(__file__).resolve().parents[3] / "frontend" / "src" / "app" / "data" / "hymns.yaml"
+    )
     
     class Config:
         env_file = ".env"

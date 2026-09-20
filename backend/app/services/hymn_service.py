@@ -149,19 +149,30 @@ class HymnService:
         hymnbook = cls.get_hymnbook(hymnbook_id)
         if not hymnbook:
             return []
-        
-        normalized_query = query.lower().strip()
-        
+
+        normalized_query = query.strip()
         if not normalized_query:
             return hymnbook.hymns
-        
+
+        normalized_query_lower = normalized_query.lower()
+        numeric_query = normalized_query_lower.strip()
+
         results = []
         for hymn in hymnbook.hymns:
-            if (str(hymn.number) in normalized_query or 
-                normalized_query in str(hymn.number) or
-                normalized_query in hymn.title.lower()):
+            hymn_number_text = str(hymn.number)
+            hymn_title_lower = hymn.title.lower()
+
+            if numeric_query.isdigit() and hymn_number_text == numeric_query:
                 results.append(hymn)
-        
+                continue
+
+            if normalized_query_lower in hymn_title_lower:
+                results.append(hymn)
+                continue
+
+            if hymn_title_lower.startswith(normalized_query_lower):
+                results.append(hymn)
+
         return results
     
     @classmethod

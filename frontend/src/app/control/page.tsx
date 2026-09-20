@@ -1,5 +1,18 @@
 import { useEffect, useMemo, useRef, useState, type MouseEvent } from 'react';
-import { Eye, EyeOff, Music, Search, Sliders, Bookmark, Trash2, ListMusic, Palette, Monitor } from 'lucide-react';
+import {
+  Eye,
+  EyeOff,
+  Music,
+  Search,
+  Sliders,
+  Bookmark,
+  Trash2,
+  ListMusic,
+  Palette,
+  Monitor,
+  Copy,
+  Check,
+} from 'lucide-react';
 import { hymnbooks, searchHymns, Hymn } from '../data/hymns';
 import {
   HymnBroadcaster,
@@ -379,6 +392,7 @@ export default function ControlPage() {
   
   const [selectedHymn, setSelectedHymn] = useState<Hymn | null>(null);
   const [searchResults, setSearchResults] = useState<Hymn[]>([]);
+  const [copyConfirmation, setCopyConfirmation] = useState(false);
   
   // activeVerseIndex = Lo que está en vivo en OBS
   const [activeVerseIndex, setActiveVerseIndex] = useState<number | null>(null);
@@ -409,6 +423,12 @@ export default function ControlPage() {
   useEffect(() => {
     localStorage.setItem('obs-saved-hymns', JSON.stringify(savedHymns));
   }, [savedHymns]);
+
+  useEffect(() => {
+    if (!copyConfirmation) return;
+    const timeoutId = window.setTimeout(() => setCopyConfirmation(false), 1200);
+    return () => window.clearTimeout(timeoutId);
+  }, [copyConfirmation]);
 
   // Persistencia de plantillas personalizadas
   useEffect(() => {
@@ -572,6 +592,31 @@ export default function ControlPage() {
     setActiveVerseIndex(null);
     setFocusedVerseIndex(0); // Enfocar la primera estrofa por defecto, pero no transmitirla
     broadcaster.clearDisplay();
+  };
+
+  const handleCopyHymnTitle = async () => {
+    if (!selectedHymn) return;
+
+    const textToCopy = `Himno #${selectedHymn.number}. ${selectedHymn.title}`;
+
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(textToCopy);
+      } else if (typeof document !== 'undefined') {
+        const textarea = document.createElement('textarea');
+        textarea.value = textToCopy;
+        textarea.setAttribute('readonly', '');
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+      }
+      setCopyConfirmation(true);
+    } catch (error) {
+      console.warn('[ControlPage] no se pudo copiar el himno:', error);
+    }
   };
 
   const handleShowVerse = (verseIndex: number, updateFocus: boolean = true) => {
@@ -891,19 +936,47 @@ export default function ControlPage() {
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0 flex-1">
                       {sectionHeader.isMini ? (
-                        <div className={`${sectionHeader.title} font-bold text-white truncate`}>
-                          <span className="text-accent">Himno #{selectedHymn.number}</span>{' '}
-                          <span className="text-white/80">—</span>{' '}
-                          <span className="text-white">{selectedHymn.title}</span>
+                        <div className={`${sectionHeader.title} font-bold text-white truncate flex items-center gap-1.5`}>
+                          <span className="text-accent">Himno #{selectedHymn.number}</span>
+                          <span className="text-white/80">—</span>
+                          <span className="text-white truncate">{selectedHymn.title}</span>
+                          <button
+                            type="button"
+                            onClick={handleCopyHymnTitle}
+                            className={`shrink-0 inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[9px] transition-colors ${
+                              copyConfirmation
+                                ? 'bg-emerald-500/20 border-emerald-400/40 text-emerald-300'
+                                : 'glass-subtle border-accent/20 text-white/60 hover:text-white hover:border-accent/40'
+                            }`}
+                            title={copyConfirmation ? '✓ Copiado' : 'Copiar título'}
+                          >
+                            {copyConfirmation ? <Check style={{ width: iconPxSm, height: iconPxSm }} /> : <Copy style={{ width: iconPxSm, height: iconPxSm }} />}
+                            <span>{copyConfirmation ? '✓ Copiado' : 'Copiar'}</span>
+                          </button>
                         </div>
                       ) : (
                         <>
                           <div className={`${sectionHeader.label} font-semibold text-accent`}>
                             Himno #{selectedHymn.number}
                           </div>
-                          <h2 className={`${sectionHeader.title} font-bold text-white mt-0.5 truncate`}>
-                            {selectedHymn.title}
-                          </h2>
+                          <div className="mt-0.5 flex items-center gap-2 min-w-0">
+                            <h2 className={`${sectionHeader.title} font-bold text-white truncate flex-1`}>
+                              {selectedHymn.title}
+                            </h2>
+                            <button
+                              type="button"
+                              onClick={handleCopyHymnTitle}
+                              className={`shrink-0 inline-flex items-center gap-1.5 rounded-md border px-1.5 py-1 transition-colors ${
+                                copyConfirmation
+                                  ? 'bg-emerald-500/20 border-emerald-400/40 text-emerald-300'
+                                  : 'glass-subtle border-accent/20 text-white/60 hover:text-white hover:border-accent/40'
+                              }`}
+                              title={copyConfirmation ? '✓ Copiado' : 'Copiar título'}
+                            >
+                              {copyConfirmation ? <Check style={{ width: iconPxSm, height: iconPxSm }} /> : <Copy style={{ width: iconPxSm, height: iconPxSm }} />}
+                              <span className="text-[10px] leading-none">{copyConfirmation ? '✓ Copiado' : 'Copiar'}</span>
+                            </button>
+                          </div>
                         </>
                       )}
                     </div>
@@ -1583,16 +1656,25 @@ export default function ControlPage() {
 
                     {/* Sombra y normalizar saltos */}
                     <div className="grid grid-cols-2 gap-2">
-                      <button
-                        onClick={() => handleConfigChange({ textShadow: !config.textShadow })}
-                        className={`rounded-md border px-2.5 py-2 text-[11px] transition-colors ${
-                          config.textShadow
-                            ? 'bg-accent/15 border-accent/40 text-white'
-                            : 'bg-black/30 border-white/10 text-white/60 hover:border-white/20'
-                        }`}
-                      >
-                        {config.textShadow ? 'Sombra: ON' : 'Sombra: OFF'}
-                      </button>
+                      <div className="flex items-center justify-between gap-2 rounded-md border border-accent/20 bg-black/20 px-2.5 py-2">
+                        <label className="text-[11px] font-medium text-white/90">Sombra de texto</label>
+                        <button
+                          type="button"
+                          role="switch"
+                          aria-checked={config.textShadow}
+                          onClick={() => handleConfigChange({ textShadow: !config.textShadow })}
+                          className={`relative inline-flex h-5 w-9 items-center rounded-full border transition-colors ${
+                            config.textShadow ? 'bg-accent/40 border-accent/60' : 'bg-white/10 border-white/15'
+                          }`}
+                          title={config.textShadow ? 'Sombra activada' : 'Sombra desactivada'}
+                        >
+                          <span
+                            className={`inline-block h-3.5 w-3.5 rounded-full bg-white shadow-sm transition-transform ${
+                              config.textShadow ? 'translate-x-5' : 'translate-x-1'
+                            }`}
+                          />
+                        </button>
+                      </div>
                       <button
                         onClick={() => handleConfigChange({ normalizeLineBreaks: !config.normalizeLineBreaks })}
                         className={`rounded-md border px-2.5 py-2 text-[11px] transition-colors ${

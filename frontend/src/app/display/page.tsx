@@ -63,9 +63,19 @@ export default function DisplayPage() {
     textarea.value = textToCopy;
     textarea.setAttribute('readonly', '');
     textarea.style.position = 'fixed';
-    textarea.style.top = '-9999px';
-    textarea.style.left = '-9999px';
+    textarea.style.top = '0';
+    textarea.style.left = '0';
+    textarea.style.width = '1px';
+    textarea.style.height = '1px';
+    textarea.style.padding = '0';
+    textarea.style.border = 'none';
+    textarea.style.outline = 'none';
+    textarea.style.boxShadow = 'none';
+    textarea.style.background = 'transparent';
     textarea.style.opacity = '0';
+    textarea.style.zIndex = '-1';
+
+    const active = document.activeElement as HTMLElement | null;
     document.body.appendChild(textarea);
     textarea.focus();
     textarea.select();
@@ -81,6 +91,7 @@ export default function DisplayPage() {
       console.error('Error al copiar desde fallback:', error);
     } finally {
       document.body.removeChild(textarea);
+      active?.focus?.();
     }
   };
 
@@ -251,7 +262,8 @@ export default function DisplayPage() {
           {config.showTitle && (
             <div 
               className={`mb-4 ${textAlignClass} pointer-events-auto cursor-pointer group relative`}
-              onClick={handleCopyTitle}
+              onPointerDown={() => void handleCopyTitle()}
+              onClick={(event) => event.preventDefault()}
               title="Haz clic para copiar el título"
             >
               <h2

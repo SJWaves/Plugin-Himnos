@@ -698,6 +698,25 @@ export default function ControlPage() {
     }
   };
 
+  const toggleTextShadow = () => {
+    const updatedConfig = { ...config, textShadow: !config.textShadow };
+    setConfig(updatedConfig);
+    broadcaster.sendConfig(updatedConfig);
+
+    if (selectedHymn && activeVerseIndex !== null) {
+      const clampedIndex = Math.max(0, Math.min(activeVerseIndex, selectedHymn.verses.length - 1));
+      const display: HymnDisplay = {
+        hymnbookId,
+        hymnNumber: selectedHymn.number,
+        hymnTitle: selectedHymn.title,
+        verseIndex: clampedIndex,
+        verseText: selectedHymn.verses[clampedIndex],
+        config: updatedConfig,
+      };
+      broadcaster.sendDisplay(display);
+    }
+  };
+
   const saveCustomTemplate = (name: string) => {
     const trimmed = name.trim();
     const newTemplate: DisplayTemplate = {
@@ -1688,7 +1707,7 @@ export default function ControlPage() {
                           type="button"
                           role="switch"
                           aria-checked={config.textShadow}
-                          onClick={() => handleConfigChange({ textShadow: !config.textShadow })}
+                          onClick={toggleTextShadow}
                           className={`relative inline-flex h-5 w-9 items-center rounded-full border transition-colors ${
                             config.textShadow ? 'bg-accent/40 border-accent/60' : 'bg-white/10 border-white/15'
                           }`}

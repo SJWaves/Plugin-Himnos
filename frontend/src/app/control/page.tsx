@@ -936,51 +936,39 @@ export default function ControlPage() {
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0 flex-1">
                       {sectionHeader.isMini ? (
-                        <div className={`${sectionHeader.title} font-bold text-white truncate flex items-center gap-1.5`}>
-                          <span className="text-accent">Himno #{selectedHymn.number}</span>
-                          <span className="text-white/80">—</span>
-                          <span className="text-white truncate">{selectedHymn.title}</span>
-                          <button
-                            type="button"
-                            onClick={handleCopyHymnTitle}
-                            className={`shrink-0 inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[9px] transition-colors ${
-                              copyConfirmation
-                                ? 'bg-emerald-500/20 border-emerald-400/40 text-emerald-300'
-                                : 'glass-subtle border-accent/20 text-white/60 hover:text-white hover:border-accent/40'
-                            }`}
-                            title={copyConfirmation ? '✓ Copiado' : 'Copiar título'}
-                          >
-                            {copyConfirmation ? <Check style={{ width: iconPxSm, height: iconPxSm }} /> : <Copy style={{ width: iconPxSm, height: iconPxSm }} />}
-                            <span>{copyConfirmation ? '✓ Copiado' : 'Copiar'}</span>
-                          </button>
+                        <div className={`${sectionHeader.title} font-bold text-white truncate`}>
+                          <span className="text-accent">Himno #{selectedHymn.number}</span>{' '}
+                          <span className="text-white/80">—</span>{' '}
+                          <span className="text-white">{selectedHymn.title}</span>
                         </div>
                       ) : (
                         <>
                           <div className={`${sectionHeader.label} font-semibold text-accent`}>
                             Himno #{selectedHymn.number}
                           </div>
-                          <div className="mt-0.5 flex items-center gap-2 min-w-0">
-                            <h2 className={`${sectionHeader.title} font-bold text-white truncate flex-1`}>
-                              {selectedHymn.title}
-                            </h2>
-                            <button
-                              type="button"
-                              onClick={handleCopyHymnTitle}
-                              className={`shrink-0 inline-flex items-center gap-1.5 rounded-md border px-1.5 py-1 transition-colors ${
-                                copyConfirmation
-                                  ? 'bg-emerald-500/20 border-emerald-400/40 text-emerald-300'
-                                  : 'glass-subtle border-accent/20 text-white/60 hover:text-white hover:border-accent/40'
-                              }`}
-                              title={copyConfirmation ? '✓ Copiado' : 'Copiar título'}
-                            >
-                              {copyConfirmation ? <Check style={{ width: iconPxSm, height: iconPxSm }} /> : <Copy style={{ width: iconPxSm, height: iconPxSm }} />}
-                              <span className="text-[10px] leading-none">{copyConfirmation ? '✓ Copiado' : 'Copiar'}</span>
-                            </button>
-                          </div>
+                          <h2 className={`${sectionHeader.title} font-bold text-white mt-0.5 truncate`}>
+                            {selectedHymn.title}
+                          </h2>
                         </>
                       )}
                     </div>
                     <div className="flex items-center gap-1.5 flex-none">
+                      <button
+                        type="button"
+                        onClick={handleCopyHymnTitle}
+                        className={`${sectionHeader.btnPad} rounded-md border transition-colors focus:outline-none focus:ring-1 focus:ring-accent/50 ${
+                          copyConfirmation
+                            ? 'bg-emerald-500/20 border-emerald-400/50 text-emerald-300'
+                            : 'glass-subtle border-accent/20 text-white/50 hover:text-white'
+                        }`}
+                        title={copyConfirmation ? '✓ Copiado' : 'Copiar himno'}
+                      >
+                        {copyConfirmation ? (
+                          <Check style={{ width: sectionHeader.btnIcon, height: sectionHeader.btnIcon }} />
+                        ) : (
+                          <Copy style={{ width: sectionHeader.btnIcon, height: sectionHeader.btnIcon }} />
+                        )}
+                      </button>
                       <button
                         onClick={toggleSaveHymn}
                         className={`${sectionHeader.btnPad} rounded-md border transition-colors focus:outline-none focus:ring-1 focus:ring-accent/50 ${
